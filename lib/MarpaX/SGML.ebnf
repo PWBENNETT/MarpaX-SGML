@@ -17,23 +17,21 @@ ds ::= s
      | ProcessingInstruction
      | MarkedSectionDeclaration
 SystematizedDocument ::= SystemDeclaration* s* SGMLDocument
-SGMLDocument ::= SGMLDocumentEntity SGMLDocumentRemainder*
-SGMLDocumentRemainder ::= SGMLSubDocumentEntity
-                        | SGMLTextEntity
-                        | CharacterDataEntity
-                        | SpecificCharacterDataEntity
-                        | NonSGMLData
+SGMLDocument ::= SGMLDocumentEntity
+               (
+                 SGMLSubDocumentEntity
+                 | SGMLTextEntity
+                 | CharacterDataEntity
+                 | SpecificCharacterDataEntity
+                 | NonSGMLData
+               )*
 SGMLDocumentEntity ::= s* SGMLDeclaration Prolog DocumentInstanceSet Ee
 SGMLSubDocumentEntity ::= Prolog DocumentInstanceSet Ee
 SGMLTextEntity ::= SGMLCharacter* Ee
 CharacterDataEntity ::= SGMLCharacter* Ee
 SpecificCharacterDataEntity ::= SGMLCharacter* Ee
 NonSGMLData ::= Character* Ee
-Prolog ::= OtherProlog* DTD DTDOP* LTDOP*
-DTDOP ::= DTD
-        | OtherProlog
-LTDOP ::= LTD
-        | OtherProlog
+Prolog ::= OtherProlog* DTD ( DTD | Other Prolog )* ( LTD | OtherProlog )*
 OtherProlog ::= CommentDeclaration
               | ProcessingInstruction
               | s
@@ -214,9 +212,7 @@ MarkedSectionDeclaration ::= MarkedSectionStart StatusKeywordSpecification dso M
 MarkedSectionStart ::= mdo dso
 MarkedSectionEnd ::= msc mdc
 MarkedSection ::= SGMLCharacter*
-StatusKeywordSpecification ::= StatusKeywordGuts* ps*
-StatusKeywordGuts ::= ps+ StatusKeyword
-                    | ps+ 'TEMP'
+StatusKeywordSpecification ::= ( ps+ StatusKeyword | ps+ 'TEMP' ) ps*
 StatusKeyword ::= 'CDATA'
                 | 'IGNORE'
                 | 'INCLUDE'
@@ -435,8 +431,7 @@ PublicConcreteSyntax ::= 'PUBLIC' ps+ PublicIdentifier PublicSwitches?
 PublicSwitches ::= 'SWITCHES' PublicSwitch+
 PublicSwitch ::= ps+ CharacterNumber ps+ CharacterNumber
 ShunnedCharacterNumberIdentification ::= 'SHUNCHAR' ps+ 'NONE'
-                                       | 'SHUNCHAR' ps+ 'CONTROLS' Shunning+
-Shunning ::= ps+ CharacterNumber
+                                       | 'SHUNCHAR' ps+ 'CONTROLS' ( ps+ CharacterNumber )+
 SyntaxReferenceCharacterSet ::= CharacterSetDescription
 FunctionCharacterIdentification ::= 'FUNCTION'
                                     ps+ 'RE' ps+ CharacterNumber
