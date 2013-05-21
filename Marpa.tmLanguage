@@ -16,7 +16,7 @@
     <array>
         <dict>
             <key>begin</key>
-            <string>^([^:]\S*)\s+(::=)</string>
+            <string>^([^: ]\S*)\s+(::=)</string>
             <key>end</key>
             <string>^(?!\s)</string>
             <key>name</key>
@@ -39,7 +39,7 @@
                 <key>1</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.variable.marpa</string>
+                    <string>source.marpa</string>
                 </dict>
             </dict>
             <key>contentName</key>
@@ -99,7 +99,7 @@
                 <key>1</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.variable.marpa</string>
+                    <string>source.marpa</string>
                 </dict>
             </dict>
             <key>contentName</key>
@@ -175,9 +175,9 @@
                 </dict>
             </dict>
             <key>name</key>
-            <string>support.function.marpa</string>
+            <string>string.marpa</string>
             <key>contentName</key>
-            <string>support.function.marpa</string>
+            <string>string.marpa</string>
             <key>patterns</key>
             <array>
                 <dict>
@@ -248,6 +248,19 @@
             </dict>
             <key>contentName</key>
             <string>string.marpa</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>match</key>
+                    <string>\\\'</string>
+                    <key>name</key>
+                    <string>constant.character.escape.marpa</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#escaped_char</string>
+                </dict>
+            </array>
         </dict>
         <key>regexp_unicode_symbol</key>
         <dict>
