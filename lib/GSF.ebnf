@@ -3,13 +3,13 @@
 Document ::= Shebang? LanguageDeclaration? Body
 Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
 LanguageDeclaration ::= '#' 'language' URI ';'
-Body ::= ( '#' Pragma ';' )* Element ( ';' Element )* ';'? Comment?
+Body ::= ( '#' Pragma ';' )* DefaultRelationSpecifier? ( '#' Pragma ';' )* Element ( ';' Element )* ';'? Comment?
 Subset ::= '{' Body '}'
 Pragma ::= 'include' FileURL
          | 'import' FileURL
          | 'layout' FileURI
          | 'glyphs' FileURI
-         | 'using' RelationID
+DefaultRelationSpecifier ::= '#' 'using' RelationID ';'
 FileURL ::= quo FilePath quo
           | URL
 FileURI ::= quo FilePath quo
