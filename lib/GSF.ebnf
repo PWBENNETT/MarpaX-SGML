@@ -3,13 +3,14 @@
 Document ::= Shebang? LanguageDeclaration? Body
 Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
 LanguageDeclaration ::= '#' 'language' URI ';'
-Body ::= ( '#' Pragma ';' )* DefaultRelationSpecifier? ( '#' Pragma ';' )* Element ( ';' Element )* ';'? Comment?
+Body ::= Pragma* DefaultRelationDeclaration? Pragma* Element ( ';' Comment* Element )* ';'? Comment?
 Subset ::= '{' Body '}'
-Pragma ::= 'include' FileURL
-         | 'import' FileURL
-         | 'layout' FileURI
-         | 'glyphs' FileURI
-DefaultRelationSpecifier ::= '#' 'using' RelationID ';'
+Pragma ::= Comment* PragmaBody ';' Comment*
+PragmaBody ::= '#include' FileURL
+             | '#import' FileURL
+             | '#layout' FileURI
+             | '#glyphs' FileURI
+DefaultRelationDeclaration ::= Comment* '#using' RelationID ';' Comment*
 FileURL ::= quo FilePath quo
           | URL
 FileURI ::= quo FilePath quo
@@ -21,14 +22,12 @@ RelativeFilePath ::= PathPart ( PathSep PathPart )* PathSep Filename
 Element ::= Declaration
           | Graph
           | Subset
-          | Element Comment
-          | Comment Element
 Comment ::= '/*' any '*/'
 Declaration ::= Variable equals Subset
               | Variable equals Clause
               | Macro copies Subset
               | Macro copies Clause
-              | Transform lookslike '[' TransDefList ']'
+              | TransformID lookslike TransDefList
               | AppearanceID lookslike AppearanceDef
               | InterfaceID lookslike InterfaceDef
               | RelationID has Appearance DerivedAppearance*
@@ -39,14 +38,17 @@ Profile ::= Appearance
           | Interface
 DerivedProfile ::= ( with | without ) Appearance
                  | ( with | without ) Interface
+                 | '*' Transform
 DerivedAppearance ::= ( with | without ) Appearance
 InterfaceDef ::= '(' Port ( ',' Port )* ')'
 AppearanceDef ::= '[' Feature ( ',' Feature )* ']'
+Transform ::= TransformID
+            | TransDefList
 Interface ::= InterfaceID
             | InterfaceDef
 Appearance ::= AppearanceID
              | AppearanceDef
-Graph ::= LHS Relation ( MHS Relation )* RHS ( '*' Transform )*
+Graph ::= LHS Edge ( MHS Edge )* RHS ( '*' Transform )*
 LHS ::= LHSJoin
       | Joinable ( '(' LHSJoin ')' )?
 LHSJoin ::= Glyph Join?
@@ -62,18 +64,19 @@ Glyph ::= GlyphID
         | Reference
 Reference ::= Macro
             | Variable
-Relation ::= RelSource Relationship RelTarget
-           | DefaultRelation
+Edge ::= RelSource Relationship RelTarget
+       | DefaultRelation
 DefaultRelation ::= '->'
                   | '-->'
                   | '<->'
+                  | '<-->'
 RelSource ::= '-['
             | '--['
             | '<-['
 RelTarget ::= ']->'
 Relationship ::= RelationID ( ',' RelationID )*
                | Relationship '+' Appearance
-TransDefList ::= TransformDef ( ',' TransformDef )*
+TransDefList ::= '[' TransformDef ( ',' TransformDef )* ']'
 TransformDef ::= Condition? TypedTransform
 Condition ::= FeatureExpression '?'
 TypedTransform ::= Relationship '>' Relationship
