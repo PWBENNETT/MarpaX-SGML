@@ -16,7 +16,7 @@ ds ::= s
      | CommentDeclaration
      | ProcessingInstruction
      | MarkedSectionDeclaration
-SystematizedDocument ::= SystemDeclaration* s* SGMLDocument
+SystematizedDocument ::= ( SystemDeclaration s+ )? SGMLDocument
 SGMLDocument ::= SGMLDocumentEntity
                (
                  SGMLSubDocumentEntity
@@ -239,13 +239,8 @@ BracketedTextGuts ::= 'STARTTAG'
 ExternalEntitySpecification ::= ExternalIdentifier
                               | ExternalIdentifier ps+ EntityType
 EntityType ::= 'SUBDOC'
-             | EntityTypeGuts
-EntityTypeGuts ::= EntityTypeGutsGuts ps+ NotationName DataAttributeSpecification
-EntityTypeGutsGuts ::= 'NDATA'
-                     | 'CDATA'
-                     | 'SDATA'
-DTD ::= mdo 'DOCTYPE' ps+ DocumentTypeName EIGuts? WrappedDTDSubset? ps* mdc
-EIGuts ::= ps+ ExternalIdentifier
+             | ( 'NDATA' | 'CDATA' | 'SDATA' ) ps+ NotationName DataAttributeSpecification
+DTD ::= mdo 'DOCTYPE' ps+ DocumentTypeName ( ps+ ExternalIdentifier )? WrappedDTDSubset? ps* mdc
 WrappedDTDSubset ::= ps+ dso DTDSubset+ dsc
 DocumentTypeName ::= GenericIdentifier
 DTDSubset ::= EntitySet+
@@ -281,9 +276,7 @@ EndTagMinimization ::= 'O'
 DeclaredContent ::= 'CDATA'
                   | 'RCDATA'
                   | 'EMPTY'
-ContentModel ::= ModelGroup CMExceptionsGuts?
-               | 'ANY' CMExceptionsGuts?
-CMExceptionsGuts ::= ps+ Exceptions
+ContentModel ::= ( ModelGroup | 'ANY' ) ( ps+ Exceptions )?
 ModelGroup ::= grpo ts* ContentToken ConnectedContentToken* ts* grpc
 ConnectedContentToken ::= ts* Connector ts* ContentToken
 ContentToken ::= PrimitiveContentToken
@@ -299,11 +292,8 @@ OccurenceIndicator ::= opt
                      | plus
                      | rep
 DataTagGroup ::= dtgo ts* GenericIdentifier ts* seq ts* DataTagPattern ts* dtgc OccurenceIndicator?
-DataTagPattern ::= DataTagTemplateGroup DataTagPaddingTemplateGuts?
-                 | DataTagTemplate DataTagPaddingTemplateGuts?
-DataTagPaddingTemplateGuts ::= ts* seq DataTagPaddingTemplate
-DataTagTemplateGroup ::= grpo ts* DataTagTemplate DTTA* ts* grpc
-DTTA ::= ts* or ts* DataTagTemplate
+DataTagPattern ::= ( DataTagTemplate | DataTagTemplateGroup ) ( ts* seq DataTagPaddingTemplate )?
+DataTagTemplateGroup ::= grpo ts* DataTagTemplate ( ts* or ts* DataTagTemplate )* ts* grpc
 DataTagTemplate ::= ParameterLiteral
 DataTagPaddingTemplate ::= ParameterLiteral
 Exceptions ::= Exclusions
@@ -329,9 +319,8 @@ DeclaredValue ::= 'CDATA'
                 | 'NUMBERS'
                 | 'NUTOKEN'
                 | 'NUTOKENS'
-                | Notation
+                | 'NOTATION' ps* NameGroup
                 | NameTokenGroup
-Notation ::= 'NOTATION' ps* NameGroup
 DefaultValue ::= DVFixedMarker? AttributeValueSpecification
                | rni DVMagicMarker
 DVFixedMarker ::= rni 'FIXED' ps+
@@ -455,15 +444,12 @@ Boolean ::= 'YES'
           | 'NO'
 CountedBoolean ::= 'YES' ps+ Number
                  | 'NO'
-ASN1Boolean ::= 'YES' ps+ 'ASN1'
-              | 'YES'
+ASN1Boolean ::= 'YES' ( ps+ 'ASN1' )?
               | 'NO'
 DelimiterSet ::= 'DELIM' ps+ GeneralDelimiters ps+ ShortReferenceDelimiters
 GeneralDelimiters ::= 'GENERAL' ps+ 'SGMLREF' SGMLDelim+
-SGMLDelim::= ps+ Name ps+ ParameterLiteral
-ShortReferenceDelimiters ::= 'SHORTREF' ps+ 'SGMLREF' ShRef+
-                           | 'SHORTREF' ps+ 'NONE' ShRef+
-ShRef ::= ps+ ParameterLiteral
+SGMLDelim ::= ps+ Name ps+ ParameterLiteral
+ShortReferenceDelimiters ::= 'SHORTREF' ps+ ( 'SGMLREF' | 'NONE' ) ( ps+ ParameterLiteral )+
 ReservedNameUse ::= 'NAMES' ps+ 'SGMLREF' NamePair+
 NamePair ::= ps+ Name ps+ Name
 QuantitySet ::= ::= 'QUANTITY' ps+ 'SGMLREF' NameQuantity+

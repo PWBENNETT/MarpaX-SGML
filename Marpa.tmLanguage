@@ -48,6 +48,10 @@
             <array>
                 <dict>
                     <key>include</key>
+                    <string>#adverb</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#quoted_literal</string>
                 </dict>
                 <dict>
@@ -108,6 +112,10 @@
             <array>
                 <dict>
                     <key>include</key>
+                    <string>#adverb</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#nonterminal</string>
                 </dict>
             </array>
@@ -136,6 +144,10 @@
             <string>string.marpa</string>
             <key>patterns</key>
             <array>
+                <dict>
+                    <key>include</key>
+                    <string>#adverb</string>
+                </dict>
                 <dict>
                     <key>include</key>
                     <string>#regexp_content</string>
@@ -251,12 +263,6 @@
             <key>patterns</key>
             <array>
                 <dict>
-                    <key>match</key>
-                    <string>\\\'</string>
-                    <key>name</key>
-                    <string>constant.character.escape.marpa</string>
-                </dict>
-                <dict>
                     <key>include</key>
                     <string>#escaped_char</string>
                 </dict>
@@ -300,9 +306,9 @@
                     <string>string.regexp.compile.marpa</string>
                 </dict>
             </dict>
-       </dict>
-       <key>regexp_content</key>
-       <dict>
+        </dict>
+        <key>regexp_content</key>
+        <dict>
             <key>patterns</key>
             <array>
                 <dict>
@@ -411,10 +417,43 @@
                 <dict>
                     <key>include</key>
                     <string>#quantifier</string>
-               </dict>
-               <dict>
+                </dict>
+                <dict>
                     <key>include</key>
                     <string>#nonterminal</string>
+                </dict>
+            </array>
+        </dict>
+        <key>adverb</key>
+        <dict>
+            <key>begin</key>
+            <string>(\S+)\s+(=&gt;)</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>constant.other.key.marpa</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.variable.marpa</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>(?!:(.+(=&gt;))|$)</string>
+            <key>name</key>
+            <string>source.marpa</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>#quoted_literal</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#adverb</string>
                 </dict>
             </array>
         </dict>
