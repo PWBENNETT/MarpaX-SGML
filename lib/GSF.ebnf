@@ -1,0 +1,124 @@
+:start ::= Document
+:ignore ::= whitespace
+Document ::= Shebang? LanguageDeclaration? Body
+Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
+LanguageDeclaration ::= '#' 'language' URI ';'
+Body ::= ( '#' Pragma ';' )* Element ( ';' Element )* ';'? Comment?
+Subset ::= '{' Body '}'
+Pragma ::= 'include' FileURL
+         | 'import' FileURL
+         | 'layout' FileURI
+         | 'glyphs' FileURI
+         | 'using' RelationID
+FileURL ::= quo FilePath quo
+          | URL
+FileURI ::= quo FilePath quo
+          | URI
+FilePath ::= RelativeFilePath
+           | AbsoluteFilePath
+AbsoluteFilePath ::= FSRoot RelativeFilePath
+RelativeFilePath ::= PathPart ( PathSep PathPart )* PathSep Filename
+Element ::= Declaration
+          | Graph
+          | Subset
+          | Element Comment
+          | Comment Element
+Comment ::= '/*' any '*/'
+Declaration ::= Variable equals Subset
+              | Variable equals Clause
+              | Macro copies Subset
+              | Macro copies Clause
+              | Transform lookslike '[' TransDefList ']'
+              | AppearanceID lookslike AppearanceDef
+              | InterfaceID lookslike InterfaceDef
+              | RelationID has Appearance DerivedAppearance*
+              | GlyphID has Profile DerivedProfile*
+              | RelationID is RelationID DerivedAppearance+
+              | GlyphID is GlyphID DerivedProfile+
+Profile ::= Appearance
+          | Interface
+DerivedProfile ::= ( with | without ) Appearance
+                 | ( with | without ) Interface
+DerivedAppearance ::= ( with | without ) Appearance
+InterfaceDef ::= '(' Port ( ',' Port )* ')'
+AppearanceDef ::= '[' Feature ( ',' Feature )* ']'
+Interface ::= InterfaceID
+            | InterfaceDef
+Appearance ::= AppearanceID
+             | AppearanceDef
+Graph ::= LHS Relation ( MHS Relation )* RHS ( '*' Transform )*
+LHS ::= LHSJoin
+      | Joinable ( '(' LHSJoin ')' )?
+LHSJoin ::= Glyph Join?
+MHS ::= Join? Glyph Join?
+      | ( '(' RHSJoin ')' )? Joinable ( '(' LHSJoin ')' )?
+RHS ::= RHSJoin
+      | ( '(' RHSJoin ')' )? Joinable
+RHSJoin ::= Join? Glyph
+Join ::= '(' Port ')'
+Joinable ::= Clause
+            | Reference
+Glyph ::= GlyphID
+        | Reference
+Reference ::= Macro
+            | Variable
+Relation ::= RelSource Relationship RelTarget
+           | DefaultRelation
+DefaultRelation ::= '->'
+                  | '-->'
+                  | '<->'
+RelSource ::= '-['
+            | '--['
+            | '<-['
+RelTarget ::= ']->'
+Relationship ::= RelationID ( ',' RelationID )*
+               | Relationship '+' Appearance
+TransDefList ::= TransformDef ( ',' TransformDef )*
+TransformDef ::= Condition? TypedTransform
+Condition ::= FeatureExpression '?'
+TypedTransform ::= Relationship '>' Relationship
+                 | Clause '>' Clause
+                 | ( Appearance '>' )? Appearance
+FeatureExpression ::= DefiniteFeature ( 'or'? FeatureExpression )*
+                    | '(' FeatureExpression ')'
+Feature ::= DefiniteFeature
+          | undef FeatureID
+DefiniteFeature ::= set FeatureID
+                  | clear FeatureID
+Clause ::= '(' Graph ( ',' Graph )* ')'
+Variable ::= Name
+Macro ::= Name
+Transform ::= Name
+GlyphID ::= '#'? Name
+          | '#' Number
+RelationID ::= '&'? Name
+             | '&' Number
+FeatureID ::= '%'? Name
+            | '%' Number
+InterfaceID ::= '@:'? Name
+              | '@:' Number
+AppearanceID ::= '%:'? Name
+               | '%:' Number
+Port ::= '@'? Name
+       | '@' Number
+Number ~ \p{Digit}+
+Name ~ [\p{Letter}_]
+       (
+         [\p{Letter}\p{Digit}_.\@\$\%/:+-]*
+         [\p{Letter}\p{Digit}_]
+       )?
+       [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]*
+whitespace ~ \p{Separator}+
+quo ~ [']
+any ~ .+
+eol ~ \n+
+equals ~ =
+copies ~ :
+lookslike ~ ~
+has ~ has
+is ~ is
+with ~ \+
+without ~ -
+set ~ \+
+clear ~ -
+undef ~ ~
