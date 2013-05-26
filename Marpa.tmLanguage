@@ -259,7 +259,7 @@
                 </dict>
             </dict>
             <key>contentName</key>
-            <string>string.marpa</string>
+            <string>string.quoted.single.marpa</string>
             <key>patterns</key>
             <array>
                 <dict>
