@@ -4,12 +4,12 @@ Document ::= Shebang? LanguageDeclaration? Body
 Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
 LanguageDeclaration ::= '#' 'language' URI ';'
 Body ::= Pragma* DefaultRelationDeclaration? Pragma* Element ( ';' Comment* Element )* ';'? Comment?
-Subset ::= '{' Body '}'
+Subset ::= '{' Body '}' ( '*' Transform )*
 Pragma ::= Comment* PragmaBody ';' Comment*
 PragmaBody ::= '#include' FileURL
              | '#import' FileURL
              | '#layout' FileURI
-             | '#glyphs' FileURI
+             | '#glyphs' FileURL
 DefaultRelationDeclaration ::= Comment* '#using' RelationID ';' Comment*
 FileURL ::= quo FilePath quo
           | URL
@@ -81,6 +81,7 @@ TransformDef ::= Condition? TypedTransform
 Condition ::= FeatureExpression '?'
 TypedTransform ::= Relationship '>' Relationship
                  | Clause '>' Clause
+                 | Graph '>' Graph
                  | ( Appearance '>' )? Appearance
 FeatureExpression ::= DefiniteFeature ( 'or'? FeatureExpression )*
                     | '(' FeatureExpression ')'
@@ -89,7 +90,8 @@ Feature ::= DefiniteFeature
 DefiniteFeature ::= set FeatureID
                   | clear FeatureID
 Clause ::= '(' Graph ( ',' Graph )* ')'
-Variable ::= Name
+Variable ::= '$'? Name
+           | '$' Number
 Macro ::= Name
 Transform ::= Name
 GlyphID ::= '#'? Name
@@ -105,6 +107,10 @@ AppearanceID ::= '%:'? Name
 Port ::= '@'? Name
        | '@' Number
 Number ~ \p{Digit}+
+Decimal ::=  '-'? Number ( '.' Number )?
+RealNumber ::= Decimal ( ( 'e' | 'E' ) '-'? Number )
+ComplexNumber ::= RealNumber ( '+' | '-' ) RealNumber 'i'
+                | '-'? RealNumber 'i'
 Name ~ [\p{Letter}_]
        (
          [\p{Letter}\p{Digit}_.\@\$\%/:+-]*

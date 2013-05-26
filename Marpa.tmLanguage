@@ -442,7 +442,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>(?!:(.+(=&gt;))|$)</string>
+            <string>(?!:(.+=&gt;)|$)</string>
             <key>name</key>
             <string>source.marpa</string>
             <key>patterns</key>
