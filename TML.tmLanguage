@@ -128,7 +128,7 @@
                 <key>0</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.string.begin.xml</string>
+                    <string>punctuation.definition.string.begin.xml.tmlanguage</string>
                 </dict>
             </dict>
             <key>end</key>
@@ -138,11 +138,11 @@
                 <key>0</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.string.end.xml</string>
+                    <string>punctuation.definition.string.end.xml.tmlanguage</string>
                 </dict>
             </dict>
             <key>name</key>
-            <string>string.quoted.double.xml</string>
+            <string>string.quoted.double.xml.tmlanguage</string>
         </dict>
         <key>singlequotedString</key>
         <dict>
@@ -153,7 +153,7 @@
                 <key>0</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.string.begin.xml</string>
+                    <string>punctuation.definition.string.begin.xml.tmlanguage</string>
                 </dict>
             </dict>
             <key>end</key>
@@ -163,11 +163,11 @@
                 <key>0</key>
                 <dict>
                     <key>name</key>
-                    <string>punctuation.definition.string.end.xml</string>
+                    <string>punctuation.definition.string.end.xml.tmlanguage</string>
                 </dict>
             </dict>
             <key>name</key>
-            <string>string.quoted.single.xml</string>
+            <string>string.quoted.single.xml.tmlanguage</string>
         </dict>
         <key>outerDict</key>
         <dict>
