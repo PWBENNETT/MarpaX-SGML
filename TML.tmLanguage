@@ -220,7 +220,7 @@
         <key>outerDecls</key>
         <dict>
             <key>match</key>
-            <string>(&lt;)(key)(&gt;)(scopeName|fileTypes|name|patterns|repository)(&lt;/)(key)(&gt;)</string>
+            <string>(&lt;)(key)(&gt;)(.+?)(&lt;/)(key)(&gt;)</string>
             <key>captures</key>
             <dict>
                 <key>0</key>

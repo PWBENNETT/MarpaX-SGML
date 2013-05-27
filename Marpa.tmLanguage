@@ -141,7 +141,7 @@
                 </dict>
             </dict>
             <key>contentName</key>
-            <string>string.marpa</string>
+            <string>string.regexp.compile.marpa</string>
             <key>patterns</key>
             <array>
                 <dict>
@@ -187,9 +187,9 @@
                 </dict>
             </dict>
             <key>name</key>
-            <string>string.marpa</string>
+            <string>string.regexp.compile.marpa</string>
             <key>contentName</key>
-            <string>string.marpa</string>
+            <string>string.regexp.compile.marpa</string>
             <key>patterns</key>
             <array>
                 <dict>
@@ -227,7 +227,7 @@
                 </dict>
             </dict>
             <key>contentName</key>
-            <string>source.marpa</string>
+            <string>string.regexp.compile.marpa</string>
             <key>patterns</key>
             <array>
                 <dict>

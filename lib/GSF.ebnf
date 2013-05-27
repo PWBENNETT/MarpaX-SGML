@@ -4,7 +4,7 @@ Document ::= Shebang? LanguageDeclaration? Body
 Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
 LanguageDeclaration ::= '#' 'language' URI ';'
 Body ::= Pragma* DefaultRelationDeclaration? Pragma* Element ( ';' Comment* Element )* ';'? Comment?
-Subset ::= '{' Body '}' ( '*' Transform )*
+Subset ::= '{' Body '}' ( modifiedby Transform )*
 Pragma ::= Comment* PragmaBody ';' Comment*
 PragmaBody ::= '#include' FileURL
              | '#import' FileURL
@@ -38,7 +38,7 @@ Profile ::= Appearance
           | Interface
 DerivedProfile ::= ( with | without ) Appearance
                  | ( with | without ) Interface
-                 | '*' Transform
+                 | modifiedby Transform
 DerivedAppearance ::= ( with | without ) Appearance
 InterfaceDef ::= '(' Port ( ',' Port )* ')'
 AppearanceDef ::= '[' Feature ( ',' Feature )* ']'
@@ -48,7 +48,7 @@ Interface ::= InterfaceID
             | InterfaceDef
 Appearance ::= AppearanceID
              | AppearanceDef
-Graph ::= LHS Edge ( MHS Edge )* RHS ( '*' Transform )*
+Graph ::= LHS Edge ( MHS Edge )* RHS ( modifiedby Transform )*
 LHS ::= LHSJoin
       | Joinable ( '(' LHSJoin ')' )?
 LHSJoin ::= Glyph Join?
@@ -79,10 +79,10 @@ Relationship ::= RelationID ( ',' RelationID )*
 TransDefList ::= '[' TransformDef ( ',' TransformDef )* ']'
 TransformDef ::= Condition? TypedTransform
 Condition ::= FeatureExpression '?'
-TypedTransform ::= Relationship '>' Relationship
-                 | Clause '>' Clause
-                 | Graph '>' Graph
-                 | ( Appearance '>' )? Appearance
+TypedTransform ::= Relationship becomes Relationship
+                 | Clause becomes Clause
+                 | Graph becomes Graph
+                 | ( Appearance becomes )? Appearance
 FeatureExpression ::= DefiniteFeature ( 'or'? FeatureExpression )*
                     | '(' FeatureExpression ')'
 Feature ::= DefiniteFeature
@@ -119,7 +119,7 @@ Name ~ [\p{Letter}_]
        [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]*
 whitespace ~ \p{Separator}+
 quo ~ [']
-any ~ .+
+any ~ .+?
 eol ~ \n+
 equals ~ =
 copies ~ :
@@ -131,3 +131,5 @@ without ~ -
 set ~ \+
 clear ~ -
 undef ~ ~
+becomes ~ >
+modifiedby ~ \*
