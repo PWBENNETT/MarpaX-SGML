@@ -122,25 +122,36 @@ GraphList ::= Graph ',' GraphList
 Variable ~ PfxVariable Name
          | PfxVariable Number
          | Name
-Macro ::= Name
-Transform ::= Name
+Macro ~ Name
+TransformID ~ PfxTransform Name
+            | PfxTransform Number
+            | Name
 GlyphID ~ PfxGlyph Name
         | PfxGlyph Number
         | Name
 RelationID ~ PfxRelation Name
            | PfxRelation Number
            | Name
-FeatureID ~ '%'? Name
-          | '%' Number
-InterfaceID ~ '@:'? Name
-            | '@:' Number
-AppearanceID ~ '%:'? Name
-             | '%:' Number
-Port ~ '@'? Name
-     | '@' Number
+FeatureID ~ PfxFeature Name
+          | PfxFeature Number
+          | Name
+InterfaceID ~ PfxInterface Name
+            | PfxInterface Number
+            | Name
+AppearanceID ~ PfxAppearance Name
+             | PfxAppearance Number
+             | Name
+Port ~ PfxPort Name
+     | PfxPort Number
+     | Name
+PfxTransform ~ '!'
 PfxVariable ~ '$'
 PfxGlyph ~ '#'
 PfxRelation ~ '&'
+PfxFeature ~ '%'
+PfxInterface ~ '@:'
+PfxAppearance ~ '%:'
+PfxPort ~ '@'
 Number ~ [\p{Digit}]+
 Name ~ NMSTART NMCHAR? PRIME*
 NMSTART ~ [\p{Letter}_]
