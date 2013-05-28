@@ -116,7 +116,7 @@ Feature ::= DefiniteFeature
           | undef FeatureID
 DefiniteFeature ::= set FeatureID
                   | clear FeatureID
-Clause ::= '(' GraphList ')'
+Clause ::= '(' GraphList ')' Transformed*
 GraphList ::= Graph ',' GraphList
             | Graph
 Variable ~ PfxVariable Name
@@ -155,7 +155,7 @@ PfxPort ~ '@'
 Number ~ [\p{Digit}]+
 Name ~ NMSTART NMCHAR? PRIME*
 NMSTART ~ [\p{Letter}_]
-NMCHAR ~  [\p{Letter}\p{Digit}_.\@\$\%/:+-]* [\p{Letter}\p{Digit}_]
+NMCHAR ~  [\p{Letter}\p{Digit}_.\@\$\%\\/:+-]* [\p{Letter}\p{Digit}_]
 PRIME ~ [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]
 whitespace ~ [\p{Separator}]+
 quo ~ [']
