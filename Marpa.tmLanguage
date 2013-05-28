@@ -16,7 +16,7 @@
     <array>
         <dict>
             <key>begin</key>
-            <string>^([^: ]\S*)\s+(::=)</string>
+            <string>^([^: ]\S*)\s+(::=|~)</string>
             <key>end</key>
             <string>^(?!\s)</string>
             <key>name</key>
@@ -59,28 +59,22 @@
                     <string>#nonterminal</string>
                 </dict>
                 <dict>
-                    <key>match</key>
-                    <string>([|]+)</string>
-                    <key>name</key>
-                    <string>punctuation.definition.variable.marpa</string>
-                    <key>captures</key>
-                    <dict>
-                        <key>1</key>
-                        <dict>
-                            <key>name</key>
-                            <string>punctuation.definition.variable.marpa</string>
-                        </dict>
-                    </dict>
+                    <key>include</key>
+                    <string>#nonterminal_alternate</string>
                 </dict>
                 <dict>
                     <key>include</key>
                     <string>#quantifier</string>
                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#regexp_brackets</string>
+               </dict>
             </array>
         </dict>
         <dict>
             <key>begin</key>
-            <string>^(:\S+)\s+(::=)</string>
+            <string>^(:\S+)\s+(::=|~)</string>
             <key>end</key>
             <string>^(?!\s)</string>
             <key>name</key>
@@ -120,43 +114,24 @@
                 </dict>
             </array>
         </dict>
+    </array>
+    <key>repository</key>
+    <dict>
+        <key>nonterminal_alternate</key>
         <dict>
-            <key>begin</key>
-            <string>^(\S+)\s+(~)</string>
-            <key>end</key>
-            <string>^(?!\s)</string>
+            <key>match</key>
+            <string>([|]+)</string>
             <key>name</key>
-            <string>punctuation.section.scope.marpa</string>
-            <key>beginCaptures</key>
+            <string>punctuation.definition.variable.marpa</string>
+            <key>captures</key>
             <dict>
                 <key>1</key>
-                <dict>
-                    <key>name</key>
-                    <string>entity.name.function.marpa</string>
-                </dict>
-                <key>2</key>
                 <dict>
                     <key>name</key>
                     <string>punctuation.definition.variable.marpa</string>
                 </dict>
             </dict>
-            <key>contentName</key>
-            <string>string.regexp.compile.marpa</string>
-            <key>patterns</key>
-            <array>
-                <dict>
-                    <key>include</key>
-                    <string>#adverb</string>
-                </dict>
-                <dict>
-                    <key>include</key>
-                    <string>#regexp_content</string>
-                </dict>
-            </array>
         </dict>
-    </array>
-    <key>repository</key>
-    <dict>
         <key>escaped_char</key>
         <dict>
             <key>match</key>
@@ -198,9 +173,48 @@
                 </dict>
                 <dict>
                     <key>include</key>
+                    <string>#regexp_posix_class</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#escaped_char</string>
                 </dict>
             </array>
+        </dict>
+        <key>regexp_posix_class</key>
+        <dict>
+            <key>begin</key>
+            <string>(\[):</string>
+            <key>end</key>
+            <string>:(\])</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>constant.character.escape.marpa</string>
+                </dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>string.regexp.compile.marpa</string>
+                </dict>
+            </dict>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>constant.character.escape.marpa</string>
+                </dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>string.regexp.compile.marpa</string>
+                </dict>
+            </dict>
+            <key>contentName</key>
+            <string>constant.character.escape.marpa</string>
         </dict>
         <key>regexp_parens</key>
         <dict>
@@ -420,6 +434,10 @@
                 </dict>
                 <dict>
                     <key>include</key>
+                    <string>#regexp_brackets</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#nonterminal</string>
                 </dict>
             </array>
@@ -442,11 +460,25 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>(?!:(.+=&gt;)|$)</string>
+            <string>(?!.)</string>
             <key>name</key>
             <string>source.marpa</string>
             <key>patterns</key>
             <array>
+                <dict>
+                    <key>match</key>
+                    <string>(::\S+)</string>
+                    <key>name</key>
+                    <string>constant.language.marpa</string>
+                    <key>captures</key>
+                    <dict>
+                        <key>1</key>
+                        <dict>
+                            <key>name</key>
+                            <string>constant.language.marpa</string>
+                        </dict>
+                    </dict>
+                </dict>
                 <dict>
                     <key>include</key>
                     <string>#quoted_literal</string>

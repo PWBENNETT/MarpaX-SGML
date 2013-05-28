@@ -1,27 +1,34 @@
 :start ::= Document
-:ignore ::= whitespace
+:discard ~ whitespace
+:discard ~ Comment
 Document ::= Shebang? LanguageDeclaration? Body
-Shebang ::= '#!' AbsoluteFilePath ( ' ' any )* eol
-LanguageDeclaration ::= '#' 'language' URI ';'
-Body ::= Pragma* DefaultRelationDeclaration? Pragma* Element ( ';' Comment* Element )* ';'? Comment?
-Subset ::= '{' Body '}' ( modifiedby Transform )*
-Pragma ::= Comment* PragmaBody ';' Comment*
-PragmaBody ::= '#include' FileURL
-             | '#import' FileURL
-             | '#layout' FileURI
-             | '#glyphs' FileURL
-DefaultRelationDeclaration ::= Comment* '#using' RelationID ';' Comment*
-FileURL ::= quo FilePath quo
-          | URL
-FileURI ::= quo FilePath quo
-          | URI
-FilePath ::= RelativeFilePath
-           | AbsoluteFilePath
-AbsoluteFilePath ::= FSRoot RelativeFilePath
-RelativeFilePath ::= PathPart ( PathSep PathPart )* PathSep Filename
+Shebang ~ '#!' AbsoluteFilePath ShebangParam* eol+
+ShebangParam ~ ' ' any
+LanguageDeclaration ~ '#language ' URI ';'
+Body ::= Pragma* DefaultRelationDeclaration? Pragma* ElementList ';'?
+Subset ::= '{' Body '}' Transformed*
+Transformed ::= modifiedby Transform
+Pragma ~ PragmaBody ';'
+PragmaBody ~ '#include ' FileURL
+           | '#import ' FileURL
+           | '#layout ' FileURI
+           | '#glyphs ' FileURL
+DefaultRelationDeclaration ~ '#using ' RelationID ';'
+FileURL ~ quo FilePath quo
+        | URL
+FileURI ~ quo FilePath quo
+        | URI
+FilePath ~ RelativeFilePath
+         | AbsoluteFilePath
+AbsoluteFilePath ~ FSRoot RelativeFilePath
+RelativeFilePath ~ PathPart PathContinuation* PathSep Filename
+PathContinuation ~ PathSep PathPart
 Element ::= Declaration
           | Graph
           | Subset
+          | ElementList
+ElementList ::= Element ';' ElementList
+              | Element
 Comment ::= '/*' any '*/'
 Declaration ::= Variable equals Subset
               | Variable equals Clause
@@ -36,10 +43,12 @@ Declaration ::= Variable equals Subset
               | GlyphID is GlyphID DerivedProfile+
 Profile ::= Appearance
           | Interface
-DerivedProfile ::= ( with | without ) Appearance
-                 | ( with | without ) Interface
-                 | modifiedby Transform
-DerivedAppearance ::= ( with | without ) Appearance
+DerivedProfile ~ with_without Appearance
+               | with_without Interface
+               | Transformed
+with_without ~ with
+             | without
+DerivedAppearance ::= with_without Appearance
 InterfaceDef ::= '(' Port ( ',' Port )* ')'
 AppearanceDef ::= '[' Feature ( ',' Feature )* ']'
 Transform ::= TransformID
@@ -48,7 +57,7 @@ Interface ::= InterfaceID
             | InterfaceDef
 Appearance ::= AppearanceID
              | AppearanceDef
-Graph ::= LHS Edge ( MHS Edge )* RHS ( modifiedby Transform )*
+Graph ::= LHS Edge ( MHS Edge )* RHS Transformed*
 LHS ::= LHSJoin
       | Joinable ( '(' LHSJoin ')' )?
 LHSJoin ::= Glyph Join?
@@ -89,47 +98,42 @@ Feature ::= DefiniteFeature
           | undef FeatureID
 DefiniteFeature ::= set FeatureID
                   | clear FeatureID
-Clause ::= '(' Graph ( ',' Graph )* ')'
-Variable ::= '$'? Name
-           | '$' Number
+Clause ::= '(' Graph MoreGraphs* ')'
+MoreGraphs ::= ',' Graph
+Variable ~ '$'? Name
+         | '$' Number
 Macro ::= Name
 Transform ::= Name
-GlyphID ::= '#'? Name
-          | '#' Number
-RelationID ::= '&'? Name
-             | '&' Number
-FeatureID ::= '%'? Name
-            | '%' Number
-InterfaceID ::= '@:'? Name
-              | '@:' Number
-AppearanceID ::= '%:'? Name
-               | '%:' Number
-Port ::= '@'? Name
-       | '@' Number
-Number ~ \p{Digit}+
-Decimal ::=  '-'? Number ( '.' Number )?
-RealNumber ::= Decimal ( ( 'e' | 'E' ) '-'? Number )
-ComplexNumber ::= RealNumber ( '+' | '-' ) RealNumber 'i'
-                | '-'? RealNumber 'i'
-Name ~ [\p{Letter}_]
-       (
-         [\p{Letter}\p{Digit}_.\@\$\%/:+-]*
-         [\p{Letter}\p{Digit}_]
-       )?
-       [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]*
-whitespace ~ \p{Separator}+
+GlyphID ~ '#'? Name
+        | '#' Number
+RelationID ~ '&'? Name
+           | '&' Number
+FeatureID ~ '%'? Name
+          | '%' Number
+InterfaceID ~ '@:'? Name
+            | '@:' Number
+AppearanceID ~ '%:'? Name
+             | '%:' Number
+Port ~ '@'? Name
+     | '@' Number
+Number ~ [\p{Digit}]+
+Name ~ NMSTART NMCHAR? PRIME*
+NMSTART ~ [\p{Letter}_]
+NMCHAR ~  [\p{Letter}\p{Digit}_.\@\$\%/:+-]* [\p{Letter}\p{Digit}_]
+PRIME ~ [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]
+whitespace ~ [\p{Separator}]+
 quo ~ [']
-any ~ .+?
-eol ~ \n+
-equals ~ =
-copies ~ :
-lookslike ~ ~
-has ~ has
-is ~ is
-with ~ \+
-without ~ -
-set ~ \+
-clear ~ -
-undef ~ ~
-becomes ~ >
-modifiedby ~ \*
+any ~ [[:graph:]]+?
+eol ~ '\n'
+equals ~ '='
+copies ~ ':'
+lookslike ~ '~'
+has ~ 'has'
+is ~ 'is'
+with ~ '+'
+without ~ '-'
+set ~ '+'
+clear ~ '-'
+undef ~ '~'
+becomes ~ '>'
+modifiedby ~ '*'
