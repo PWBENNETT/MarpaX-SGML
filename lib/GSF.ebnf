@@ -36,7 +36,7 @@ Declaration ::= Variable equals Subset
               | Variable equals Clause
               | Macro copies Subset
               | Macro copies Clause
-              | TransformID lookslike TransDefList
+              | TransformID lookslike TransformDef
               | AppearanceID lookslike AppearanceDef
               | InterfaceID lookslike InterfaceDef
               | RelationID has Appearance DerivedAppearance*
@@ -51,26 +51,34 @@ DerivedProfile ~ with_without Appearance
 with_without ~ with
              | without
 DerivedAppearance ::= with_without Appearance
-InterfaceDef ::= '(' Port ( ',' Port )* ')'
-AppearanceDef ::= '[' Feature ( ',' Feature )* ']'
+InterfaceDef ::= '(' PortList ')'
+PortList ::= Port ',' PortList
+           | Port
+AppearanceDef ::= '[' FeatureList ']'
+FeatureList ::= Feature ' ' FeatureList
+              | Feature
 Transform ::= TransformID
-            | TransDefList
+            | TransformDef
 Interface ::= InterfaceID
             | InterfaceDef
 Appearance ::= AppearanceID
              | AppearanceDef
-Graph ::= LHS Edge ( MHS Edge )* RHS Transformed*
+Graph ::= LHS Edge MiddleEdge? RHS Transformed*
+MiddleEdge ::= MHS Edge MiddleEdge
+             | MHS Edge
 LHS ::= LHSJoin
-      | Joinable ( '(' LHSJoin ')' )?
+      | Joinable ParenedLHSJoin?
+ParenedLHSJoin ::= '(' LHSJoin ')'
 LHSJoin ::= Glyph Join?
 MHS ::= Join? Glyph Join?
-      | ( '(' RHSJoin ')' )? Joinable ( '(' LHSJoin ')' )?
+      | ParenedRHSJoin? Joinable ParenedLHSJoin?
 RHS ::= RHSJoin
-      | ( '(' RHSJoin ')' )? Joinable
+      | ParenedRHSJoin? Joinable
+ParenedRHSJoin ::= '(' RHSJoin ')'
 RHSJoin ::= Join? Glyph
 Join ::= '(' Port ')'
 Joinable ::= Clause
-            | Reference
+           | Reference
 Glyph ::= GlyphID
         | Reference
 Reference ::= Macro
@@ -85,31 +93,43 @@ RelSource ::= '-['
             | '--['
             | '<-['
 RelTarget ::= ']->'
-Relationship ::= RelationID ( ',' RelationID )*
-               | Relationship '+' Appearance
-TransDefList ::= '[' TransformDef ( ',' TransformDef )* ']'
-TransformDef ::= Condition? TypedTransform
+Relationship ::= RelationIDList
+               | Relationship with_without Appearance
+RelationIDList ::= RelationID ',' RelationIDList
+                 | RelationID
+TransformDef ::= '[' IndividualTransformList ']'
+IndividualTransformList ::= IndividualTransform ',' IndividualTransformList
+                          | IndividualTransform
+IndividualTransform ::= Condition? TypedTransform
 Condition ::= FeatureExpression '?'
 TypedTransform ::= Relationship becomes Relationship
                  | Clause becomes Clause
                  | Graph becomes Graph
-                 | ( Appearance becomes )? Appearance
-FeatureExpression ::= DefiniteFeature ( 'or'? FeatureExpression )*
+                 | AppearanceSource? Appearance
+AppearanceSource ::= Appearance becomes
+FeatureExpression ::= FeatureExpressionList
                     | '(' FeatureExpression ')'
+FeatureExpressionList ::= DefiniteFeature 'or' FeatureExpression
+                        | DefiniteFeature FeatureExpression
+                        | DefiniteFeature
 Feature ::= DefiniteFeature
           | undef FeatureID
 DefiniteFeature ::= set FeatureID
                   | clear FeatureID
-Clause ::= '(' Graph MoreGraphs* ')'
-MoreGraphs ::= ',' Graph
-Variable ~ '$'? Name
-         | '$' Number
+Clause ::= '(' GraphList ')'
+GraphList ::= Graph ',' GraphList
+            | Graph
+Variable ~ PfxVariable Name
+         | PfxVariable Number
+         | Name
 Macro ::= Name
 Transform ::= Name
-GlyphID ~ '#'? Name
-        | '#' Number
-RelationID ~ '&'? Name
-           | '&' Number
+GlyphID ~ PfxGlyph Name
+        | PfxGlyph Number
+        | Name
+RelationID ~ PfxRelation Name
+           | PfxRelation Number
+           | Name
 FeatureID ~ '%'? Name
           | '%' Number
 InterfaceID ~ '@:'? Name
@@ -118,6 +138,9 @@ AppearanceID ~ '%:'? Name
              | '%:' Number
 Port ~ '@'? Name
      | '@' Number
+PfxVariable ~ '$'
+PfxGlyph ~ '#'
+PfxRelation ~ '&'
 Number ~ [\p{Digit}]+
 Name ~ NMSTART NMCHAR? PRIME*
 NMSTART ~ [\p{Letter}_]
