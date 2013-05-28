@@ -2,8 +2,11 @@
 :discard ~ whitespace
 :discard ~ Comment
 Document ::= Shebang? LanguageDeclaration? Body
-Shebang ~ '#!' AbsoluteFilePath ShebangParam* eol+
-ShebangParam ~ ' ' any
+Shebang ~ '#!' AbsoluteFilePath ShebangParams? eol+
+ShebangParams ~ ' ' ShebangParamList
+ShebangParamList ~ ShebangParam ' ' ShebangParamList
+                 | ShebangParam
+ShebangParam ~ [\p{Graph}]+
 LanguageDeclaration ~ '#language ' URI ';'
 Body ::= Pragma* DefaultRelationDeclaration? Pragma* ElementList ';'?
 Subset ::= '{' Body '}' Transformed*
@@ -26,10 +29,9 @@ PathContinuation ~ PathSep PathPart
 Element ::= Declaration
           | Graph
           | Subset
-          | ElementList
 ElementList ::= Element ';' ElementList
               | Element
-Comment ::= '/*' any '*/'
+Comment ~ '/*' any '*/'
 Declaration ::= Variable equals Subset
               | Variable equals Clause
               | Macro copies Subset
@@ -123,7 +125,7 @@ NMCHAR ~  [\p{Letter}\p{Digit}_.\@\$\%/:+-]* [\p{Letter}\p{Digit}_]
 PRIME ~ [\x{27}\x{2B9}\x{2BC}\x{2C8}\x{2CA}\x{2019}\x{2032}]
 whitespace ~ [\p{Separator}]+
 quo ~ [']
-any ~ [[:graph:]]+?
+any ~ [\p{Assigned}]+
 eol ~ '\n'
 equals ~ '='
 copies ~ ':'
