@@ -205,6 +205,10 @@
             <array>
                 <dict>
                     <key>include</key>
+                    <string>#outerDefinitionPair</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#outerDecls</string>
                 </dict>
                 <dict>
@@ -295,6 +299,59 @@
                 <dict>
                     <key>name</key>
                     <string>constant.other.key.xml.tmlanguage</string>
+                </dict>
+                <key>6</key>
+                <dict>
+                    <key>name</key>
+                    <string>entity.name.tag.xml.tmlanguage</string>
+                </dict>
+            </dict>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.xml.tmlanguage</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>entity.name.tag.xml.tmlanguage</string>
+                </dict>
+                <key>4</key>
+                <dict>
+                    <key>name</key>
+                    <string>string.regexp.compile.xml.tmlanguage</string>
+                </dict>
+                <key>6</key>
+                <dict>
+                    <key>name</key>
+                    <string>entity.name.tag.xml.tmlanguage</string>
+                </dict>
+            </dict>
+        </dict>
+        <key>outerDefinitionPair</key>
+        <dict>
+            <key>begin</key>
+            <string>(&lt;)(key)(&gt;)(match|begin|end|foldingStartMarker|foldingStopMarker)(&lt;/)(key)(&gt;)</string>
+            <key>end</key>
+            <string>(&lt;)(string)(&gt;)(.+)(&lt;/)(string)(&gt;)</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.xml.tmlanguage</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>entity.name.tag.xml.tmlanguage</string>
+                </dict>
+                <key>4</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.variable.xml.tmlanguage</string>
                 </dict>
                 <key>6</key>
                 <dict>

@@ -35,7 +35,7 @@ sub parse {
     $class ||= __PACKAGE__;
     my $self = ref($class) ? $class : $class->new();
     my ($datathing, $commandref, $parser) = @_;
-    $parser //= '_parser';
+    $parser //= 'parser';
     my $rawdata;
     if (ref $datathing eq 'SCALAR') {
         $rawdata = $$datathing;
@@ -64,7 +64,7 @@ sub ebnf {
     return io('SGML.ebnf')->slurp();
 }
 
-sub _parser {
+sub parser {
     my $class;
     $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
     $class ||= __PACKAGE__;
