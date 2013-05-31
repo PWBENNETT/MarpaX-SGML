@@ -391,14 +391,14 @@ LinkSetSpecification ~ LinkSetName
                      | rni 'EMPTY'
                      | rni 'RESTORE'
 SGMLDeclaration ~ mdo 'SGML' ps+ MinimumLiteral
-                               ps+ DocumentCharacterSet
-                               ps+ CapacitySet
-                               ps+ ConcreteSyntaxScope
-                               ps+ ConcreteSyntax
-                               ps+ FeatureUse
-                               ps+ ApplicationSpecificInformation
-                               ps*
-                    mdc
+                             ps+ DocumentCharacterSet
+                             ps+ CapacitySet
+                             ps+ ConcreteSyntaxScope
+                             ps+ ConcreteSyntax
+                             ps+ FeatureUse
+                             ps+ ApplicationSpecificInformation
+                             ps*
+                  mdc
 DocumentCharacterSet ~ 'CHARSET' CharacterSetDescription+
 CharacterSetDescription ~ ps+ BaseCharacterSet ps+ DescribedCharacterSetPortion
 BaseCharacterSet ~ 'BASESET' ps+ PublicIdentifier
@@ -433,13 +433,13 @@ PublicConcreteSyntax ~ 'PUBLIC' ps+ PublicIdentifier PublicSwitches?
 PublicSwitches ~ 'SWITCHES' PublicSwitch+
 PublicSwitch ~ ps+ CharacterNumber ps+ CharacterNumber
 ShunnedCharacterNumberIdentification ~ 'SHUNCHAR' ps+ 'NONE'
-                                     | 'SHUNCHAR' ps+ 'CONTROLS' ( ps+ CharacterNumber )+
+                                     | 'SHUNCHAR' ps+ 'CONTROLS' SCNList+
+SCNList ~ ps+ CharacterNumber
 SyntaxReferenceCharacterSet ~ CharacterSetDescription
-FunctionCharacterIdentification ~ 'FUNCTION'
-                                  ps+ 'RE' ps+ CharacterNumber
-                                  ps+ 'RS' ps+ CharacterNumber
-                                  ps+ 'SPACE' ps+ CharacterNumber
-                                  AddedFunctionCharacter*
+FunctionCharacterIdentification ~ 'FUNCTION' ps+ 'RE' ps+ CharacterNumber
+                                             ps+ 'RS' ps+ CharacterNumber
+                                             ps+ 'SPACE' ps+ CharacterNumber
+                                             AddedFunctionCharacter*
 AddedFunctionCharacter ~ ps+ AddedFunction ps+ FunctionClass ps+ CharacterNumber
 AddedFunction ~ Name
 FunctionClass ~ 'FUNCHAR'
@@ -463,36 +463,38 @@ ASN1Boolean ~ 'YES' ps+ 'ASN1'
 DelimiterSet ~ 'DELIM' ps+ GeneralDelimiters ps+ ShortReferenceDelimiters
 GeneralDelimiters ~ 'GENERAL' ps+ 'SGMLREF' SGMLDelim+
 SGMLDelim ~ ps+ Name ps+ ParameterLiteral
-ShortReferenceDelimiters ~ 'SHORTREF' ps+ ( 'SGMLREF' | 'NONE' ) ( ps+ ParameterLiteral )+
+ShortReferenceDelimiters ~ 'SHORTREF' ps+ 'SGMLREF' PLList+
+                         | 'SHORTREF' ps+ 'NONE' PLList+
+PLList ~ ps+ ParameterLiteral
 ReservedNameUse ~ 'NAMES' ps+ 'SGMLREF' NamePair+
 NamePair ~ ps+ Name ps+ Name
 QuantitySet ~ ~ 'QUANTITY' ps+ 'SGMLREF' NameQuantity+
 NameQuantity ~ ps+ Name ps+ Number
 FeatureUse ~ 'FEATURES' ps+ MarkupMinimizationFeatures
-                          ps+ LinkTypeFeatures
-                          ps+ OtherFeatures
+                        ps+ LinkTypeFeatures
+                        ps+ OtherFeatures
 MarkupMinimizationFeatures ~ 'MINIMIZE' ps+ 'DATATAG' ps+ Boolean
-                                          ps+ 'OMITTAG' ps+ Boolean
-                                          ps+ 'RANK' ps+ Boolean
-                                          ps+ 'SHORTTAG' ps+ Boolean
+                                        ps+ 'OMITTAG' ps+ Boolean
+                                        ps+ 'RANK' ps+ Boolean
+                                        ps+ 'SHORTTAG' ps+ Boolean
 LinkTypeFeatures ~ 'LINK' ps+ 'SIMPLE' ps+ CountedBoolean
-                            ps+ 'IMPLICIT' ps+ Boolean
-                            ps+ 'EXPLICIT' ps+ CountedBoolean
+                          ps+ 'IMPLICIT' ps+ Boolean
+                          ps+ 'EXPLICIT' ps+ CountedBoolean
 OtherFeatures ~ 'OTHER' ps+ 'CONCUR' ps+ CountedBoolean
-                          ps+ 'SUBDOC' ps+ CountedBoolean
-                          ps+ 'FORMAL' ps+ Boolean
+                        ps+ 'SUBDOC' ps+ CountedBoolean
+                        ps+ 'FORMAL' ps+ Boolean
 ApplicationSpecificInformation ~ 'APPINFO' ps+ 'NONE'
                                | 'APPINFO' ps+ MinimumLiteral
 SystemDeclaration ~ mdo 'SYSTEM' ps+ MinimumLiteral
-                                   ps+ DocumentCharacterSet
-                                   ps+ CapacitySet
-                                   ps+ FeatureUse
-                                   ps+ ConcreteSyntaxScope
-                                   ps+ ConcreteSyntaxesSupported+
-                                   ps+ ValidationServices
-                                   ps+ SDIFSupport
-                                   ps*
-                      mdc
+                                 ps+ DocumentCharacterSet
+                                 ps+ CapacitySet
+                                 ps+ FeatureUse
+                                 ps+ ConcreteSyntaxScope
+                                 ps+ ConcreteSyntaxesSupported+
+                                 ps+ ValidationServices
+                                 ps+ SDIFSupport
+                                 ps*
+                    mdc
 ConcreteSyntaxesSupported ~ ps+ ConcreteSyntax
                           | ps+ ConcreteSyntax ps+ ConcreteSyntaxChanges
 ConcreteSyntaxChanges ~ 'CHANGES' ps+ 'SWITCHES'
@@ -509,8 +511,8 @@ ValidationServices ~ 'VALIDATE' ps+ 'GENERAL' ps+ Boolean
                                 ps+ 'FORMAL' ps+ Boolean
 SDIFSupport ~ 'SDIF' ps+ 'PACK' ps+ ASN1Boolean
                      ps+ 'UNPACK' ps+ ASN1Boolean
-RE ~ [\x{C}]
-RS ~ [\x{B}]
+RE ~ [\x{D}]
+RS ~ [\x{A}]
 SPACE ~ [\x{20}]
 SEPCHAR ~ [\x{9}]
 LCLetter ~ [a-z]
