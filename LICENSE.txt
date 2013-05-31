@@ -1,0 +1,5 @@
+The Perl and .ebnf code herein is licensed under the same terms as Perl itself.
+
+The .tmLanguage files are hereby released into the Public Domain.
+
+(c) 2013 Paul Bennett and other contributors
