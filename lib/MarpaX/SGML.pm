@@ -74,7 +74,6 @@ sub parser {
     my $ebnf = $self->_derive_grammar($self->ebnf(), $key);
     if (!$self->{ G }->{ $key }) {
         $self->{ G }->{ $key } = Marpa::R2::Scanless::G->new($ebnf);
-        $self->{ G }->{ $key }->precompute() if $self->{ G }->{ $key }->can('precompute');
     }
     $self->{ R } ||= Marpa::R2::Scanless::R->new($self->{ G }->{ $key });
     return $self->{ R };
