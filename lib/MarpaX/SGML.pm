@@ -7,11 +7,18 @@ use Carp qw( cluck croak );
 use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
-use MarpaX::SGML::Logger;
 
 our @EXPORT_OK = qw( sgml );
 
+sub true () { return 1; }
+sub false () { return; }
+
 sub NOSUCH () { croak('Unimplemented'); }
+
+{
+    my $Nothing = [];
+    sub Nothing () { return $Nothing; }
+}
 
 sub new {
     my $class = shift;
@@ -92,16 +99,37 @@ sub _libxml_parser {
     return _parser(@_);
 }
 
-#TODO: I think I'm going to have to invent some kind of XPath-like hybrod notation like :TAG[@closed=true]
+sub shortenUnclosedStartTags { return (':TAG[@type="start" and @closed=false]' => \&_as_short_as_possible); }
+sub shortenUnclosedEndTags { return (':TAG[@type="end" and @closed=false]' => \&_as_short_as_possible); }
+sub shortenUnmatchedStartTags { return (':TAG[@type="start" and @matched=false]' => \&_as_short_as_possible); }
+sub shortenUnmatchedEndTags { return (':TAG[@type="end" and @matched=false]' => \&_as_short_as_possible); }
 
-sub shortenUnclosedStartTags { NOSUCH; }
-sub shortenUnclosedEndTags { NOSUCH; }
-sub shortenUnmatchedStartTags { NOSUCH; }
-sub shortenUnmatchedEndTags { NOSUCH; }
+sub lengthenUnclosedStartTags { return (':TAG[@type="start" and @closed=false]' => \&_as_long_as_possible); }
+sub lengthenUnclosedEndTags { return (':TAG[@type="end" and @closed=false]' => \&_as_long_as_possible); }
+sub lengthenUnmatchedStartTags { return (':TAG[@type="start" and @matched=false]' => \&_as_long_as_possible); }
+sub lengthenUnmatchedEndTags { return (':TAG[@type="end" and @matched=false]' => \&_as_long_as_possible); }
 
-sub lengthenUnclosedStartTags { NOSUCH; }
-sub lengthenUnclosedEndTags { NOSUCH; }
-sub lengthenUnmatchedStartTags { NOSUCH; }
-sub lengthenUnmatchedEndTags { NOSUCH; }
+sub _does_rule_apply {
+    my ($piece, $rule) = @_;
+    return 1 if $rule eq '*';
+    return _does_tag_apply($piece, $rule) unless $rule =~ /^([:]\w+)((?:\[).+?(?:\]))?$/;
+    my ($rtype, $rattr) = ($1, $2);
+    return unless substr(ref($piece), -length($rtype)) eq $rtype;
+    $rattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
+    $rattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
+    return eval($rattr);
+}
+
+sub _does_tag_apply {
+    my ($piece, $tag) = @_;
+    return 1 if $rule eq '*';
+    return unless $rule =~ /^([^:]\w+)((?:\[).+?(?:\]))?$/;
+    my ($rtype, $rattr) = ($1, $2);
+    return unless substr(ref($piece), -length($rtype)) eq $rtype;
+    return 1 unless $rattr;
+    $rattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
+    $rattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
+    return eval($rattr);
+}
 
 1;
