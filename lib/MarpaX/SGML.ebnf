@@ -1,36 +1,36 @@
 :start ::= SystematizedDocument
-s ~ RE meta => SPACE
-  | RS meta => SPACE
-  | SPACE meta => SPACE
-  | SEPCHAR meta => SPACE
+s ~ RE treat_as => WHITESPACE
+  | RS treat_as => WHITESPACE
+  | SPACE treat_as => WHITESPACE
+  | SEPCHAR treat_as => WHITESPACE
 ps ~ s
-   | Ee meta => EE
+   | Ee
    | ParameterEntityReference
    | CommentDeclaration
 ts ~ s
-   | Ee meta => EE
+   | Ee
    | ParameterEntityReference
 ds ~ s
-   | Ee meta => EE
+   | Ee
    | ParameterEntityReference
    | CommentDeclaration
    | ProcessingInstruction
    | MarkedSectionDeclaration
-SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument meta => TOP
+SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument treat_as => TOP
 OpeningSystemDeclarationList ~ SystemDeclaration s+
-SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* meta => SGML
+SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* treat_as => DOCUMENT
 SGMLDocumentGuts ~ SGMLSubDocumentEntity
                  | SGMLTextEntity
                  | CharacterDataEntity
                  | SpecificCharacterDataEntity
                  | NonSGMLData
-SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee meta => ENTITY
+SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee
 SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet Ee
-SGMLTextEntity ~ SGMLCharacter* Ee meta => TEXT
-CharacterDataEntity ~ SGMLCharacter* Ee meta => CDATA
-SpecificCharacterDataEntity ~ SGMLCharacter* Ee meta => SCDATA
-NonSGMLData ~ Character* Ee meta => CRUFT
-Prolog ~ OtherProlog* DTD DTDOP* LTDOP* meta => PROLOG
+SGMLTextEntity ~ SGMLCharacter* Ee treat_as => TEXT
+CharacterDataEntity ~ SGMLCharacter* Ee treat_as => CDATA
+SpecificCharacterDataEntity ~ SGMLCharacter* Ee treat_as => SCDATA
+NonSGMLData ~ Character* Ee treat_as => CRUFT
+Prolog ~ OtherProlog* DTD DTDOP* LTDOP* treat_as => PROLOG
 DTDOP ~ DTD
       | OtherProlog
 LTDOP ~ LTD
@@ -41,30 +41,30 @@ OtherProlog ~ CommentDeclaration
 DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
-Element ~ StartTag? Content EndTag? meta => ELEMENT
-StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc meta => TAG bool:closed => yes
-         | MinimizedStartTag meta => TAG
+Element ~ StartTag? Content EndTag? treat_as => ELEMENT
+StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2
+         | MinimizedStartTag treat_as => TAG
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
-EmptyStartTag ~ stago tagc bool:closed => yes
-UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* bool:closed => no
-NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net bool:closed => yes
-EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc meta => TAG bool:closed => yes
-       | MinimizedEndTag meta => TAG
+EmptyStartTag ~ stago tagc @closed => 1 @tagtype => ::undef
+UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* @closed => 0 @tagtype => $1$2
+NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net @closed => 1 @tagtype => $1
+EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2
+       | MinimizedEndTag treat_as => TAG
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
                 | NullEndTag
-EmptyEndTag ~ etago tagc bool:closed => yes
-UnclosedEndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* bool:closed => no
-NullEndTag ~ net bool:closed => yes
-Content ~ MixedContent* meta => CONTENT
-        | ElementContent* meta => CONTENT
-        | ReplaceableCharacterData* meta => CONTENT
-        | CharacterData meta => CONTENT
-MixedContent ~ DataCharacter
-             | Element
-             | OtherContent
+EmptyEndTag ~ etago tagc @closed => 1 @tagtype => ::undef
+UnclosedEndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* @closed => 0 @tagtype => $1$2
+NullEndTag ~ net @closed => 1 @tagtype => ::matching
+Content ~ MixedContent*
+        | ElementContent*
+        | ReplaceableCharacterData*
+        | CharacterData treat_as => CDATA
+MixedContent ~ DataCharacter treat_as => PCDATA
+             | Element treat_as => PCDATA
+             | OtherContent treat_as => PCDATA
 ElementContent ~ Element
                | OtherContent
                | s
@@ -81,12 +81,12 @@ DocumentTypeSpecification ~ NameGroup?
 GenericIdentifierSpeficication ~ GenericIdentifier
                                | RankStem
 GenericIdentifier ~ Name
-AttributeSpecification ~ s* Name s* vi s* AttributeValueSpecification
+AttributeSpecification ~ s* Name s* vi s* AttributeValueSpecification treat_as => ATTRIBUTE
                        | s* AttributeValueSpecification
-AttributeValueSpecification ~ AttributeValue
-                            | AttributeValueLiteral
-AttributeValueLiteral ~ lit ReplaceableCharacterData* lit
-                      | lita ReplaceableCharacterData* lita
+AttributeValueSpecification ~ AttributeValue treat_as => ATTRVAL
+                            | AttributeValueLiteral treat_as => ATTRVAL
+AttributeValueLiteral ~ lit ReplaceableCharacterData* lit @literal => 1 @quoted => 1
+                      | lita ReplaceableCharacterData* lita @literal => 1 @quoted => 1
 AttributeValue ~ CharacterData
                | GeneralEntityName
                | GeneralEntityNameList
@@ -113,16 +113,16 @@ NumberList ~ Number
            | Number SPACE NumberList
 NumberTokenList ~ NumberToken
                 | NumberToken SPACE NumberTokenList
-ProcessingInstruction ~ pio SystemData* pic meta => PI
+ProcessingInstruction ~ pio SystemData* pic treat_as => PI
 SystemData ~ CharacterData
-ReplaceableCharacterData ~ DataCharacter
-                         | CharacterReference
-                         | GeneralEntityReference
-                         | Ee
+ReplaceableCharacterData ~ DataCharacter treat_as => RCDATA
+                         | CharacterReference treat_as => RCDATA
+                         | GeneralEntityReference treat_as => RCDATA
+                         | Ee treat_as => RCDATA
 CharacterData ~ DataCharacter+
-DataCharacter ~ SGMLCharacter
+DataCharacter ~ SGMLCharacter treat_as => DATA
 Character ~ SGMLCharacter
-          | NONSGML
+          | NONSGML treat_as => CRUFT
 SGMLCharacter ~ MarkupCharacter
               | DATACHAR
 MarkupCharacter ~ NameCharacter
@@ -145,23 +145,23 @@ FunctionCharacter ~ RE
                   | MSICHAR
                   | MSSCHAR
                   | FUNCHAR
-Name ~ NameStartCharacter NameCharacter
-Number ~ Digit+
-NameToken ~ NameCharacter
-NumberToken ~ Digit NameCharacter
-GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd meta => GREF
-ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd meta => PREF
+Name ~ NameStartCharacter NameCharacter treat_as => NAME
+Number ~ Digit+ treat_as => NUMBER
+NameToken ~ NameCharacter treat_as => TOKEN
+NumberToken ~ Digit NameCharacter treat_as => TOKEN
+GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd treat_as => GREF
+ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd treat_as => PREF
 ReferenceEnd ~ refc
              | refc RE
-CharacterReference ~ cro FunctionName ReferenceEnd meta => CREF bool:numeric => no
-                   | cro CharacterNumber ReferenceEnd meta => CREF bool:numeric => yes
+CharacterReference ~ cro FunctionName ReferenceEnd treat_as => CREF @numeric => 0
+                   | cro CharacterNumber ReferenceEnd treat_as => CREF @numeric => 1
 FunctionName ~ 'RE'
              | 'RS'
              | 'SPACE'
              | Name
 CharacterNumber ~ Number
-ParameterLiteral ~ lit ReplaceableParameterData* lit meta => RPDATA
-                 | lita ReplaceableParameterData* lita meta => RPDATA
+ParameterLiteral ~ lit ReplaceableParameterData* lit @literal => 1 @quoted => 1
+                 | lita ReplaceableParameterData* lita @literal => 1 @quoted => 1
 ReplaceableParameterData ~ DataCharacter
                          | CharacterReference
                          | ParameterEntityReference
@@ -207,11 +207,11 @@ PublicTextDescription ~ ISOTextDescription
 ISOTextDescription ~ MinimumData
 PublicTextLanguage ~ Name
 PublicTextDesignatingSequence ~ Name
-CommentDeclaration ~ mdo CommentList? mdc meta => COMMENT
+CommentDeclaration ~ mdo CommentList? mdc treat_as => COMMENT
 CommentList ~ Comment s
             | Comment s CommentList
 Comment ~ com SGMLCharacter* com
-MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd meta => MARKED
+MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd treat_as => MARKED
 MarkedSectionStart ~ mdo dso
 MarkedSectionEnd ~ msc mdc
 MarkedSection ~ SGMLCharacter*
@@ -246,7 +246,7 @@ EntityType ~ 'SUBDOC'
            | 'NDATA' ps+ NotationName DataAttributeSpecification
            | 'CDATA' ps+ NotationName DataAttributeSpecification
            | 'SDATA' ps+ NotationName DataAttributeSpecification
-DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc meta => DTD
+DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc treat_as => DTD
 OptionalEI ~ ps+ ExternalIdentifier
 WrappedDTDSubset ~ ps+ dso DTDSubset+ dsc
 DocumentTypeName ~ GenericIdentifier
@@ -314,8 +314,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc meta => ATTLIST
-                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc meta => ATTLIST
+AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc treat_as => ATTLIST
+                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc treat_as => ATTLIST
 AttributeDefinition ~ ps+ AttributeName ps+ DeclaredValue ps+ DefaultValue
 AttributeName ~ Name
 DeclaredValue ~ 'CDATA'
@@ -353,7 +353,7 @@ ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* md
 AETGuts ~ ps+ AssociatedElementType
 MapSpecification ~ MapName
                  | rni 'EMPTY'
-LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc meta => LTD
+LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc treat_as => LTD
 LinkSpecification ~ SimpleLinkSpecification
                   | ImplicitLinkSpecification
                   | ExplicitLinkSpecification
@@ -453,13 +453,13 @@ NamingRules ~ 'NAMING' ps+ 'LCNMSTART' ps+ ParameterLiteral
                        ps+ 'UCNMCHAR' ps+ ParameterLiteral
                        ps+ 'NAMECASE' ps+ 'GENERAL' ps+ Boolean
                        ps+ 'ENTITY' ps+ Boolean
-Boolean ~ 'YES'
-        | 'NO'
-CountedBoolean ~ 'YES' ps+ Number
-               | 'NO'
-ASN1Boolean ~ 'YES' ps+ 'ASN1'
-            | 'YES'
-            | 'NO'
+Boolean ~ 'YES' @literal => 1 @quoted => 0
+        | 'NO' @literal => 1 @quoted => 0
+CountedBoolean ~ 'YES' ps+ Number @literal => 1 @quoted => 0
+               | 'NO' @literal => 1 @quoted => 0
+ASN1Boolean ~ 'YES' ps+ 'ASN1' @literal => 1 @quoted => 0
+            | 'YES' @literal => 1 @quoted => 0
+            | 'NO' @literal => 1 @quoted => 0
 DelimiterSet ~ 'DELIM' ps+ GeneralDelimiters ps+ ShortReferenceDelimiters
 GeneralDelimiters ~ 'GENERAL' ps+ 'SGMLREF' SGMLDelim+
 SGMLDelim ~ ps+ Name ps+ ParameterLiteral
@@ -494,7 +494,7 @@ SystemDeclaration ~ mdo 'SYSTEM' ps+ MinimumLiteral
                                  ps+ ValidationServices
                                  ps+ SDIFSupport
                                  ps*
-                    mdc meta => SYSTEM
+                    mdc treat_as => SYSTEM
 ConcreteSyntaxesSupported ~ ps+ ConcreteSyntax
                           | ps+ ConcreteSyntax ps+ ConcreteSyntaxChanges
 ConcreteSyntaxChanges ~ 'CHANGES' ps+ 'SWITCHES'
@@ -565,7 +565,7 @@ shortref ~ '&#TAB;'
          | '|'
          | '}'
          | '~'
-vi ~ '=' meta => VALUE_IS
+vi ~ '='
 plus ~ '+'
 minus ~ '-'
 slashslash ~ '//'
@@ -595,4 +595,4 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
-Ee ~ [\b]
+Ee ~ [\b] treat_as => EE
