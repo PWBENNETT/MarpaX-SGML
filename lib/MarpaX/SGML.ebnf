@@ -17,51 +17,51 @@ ds ~ s
    | ProcessingInstruction
    | MarkedSectionDeclaration
 SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument meta => TOP
-OpeningSystemDeclarationList ~ SystemDeclaration s+ meta => SYSTEM
+OpeningSystemDeclarationList ~ SystemDeclaration s+
 SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* meta => SGML
-SGMLDocumentGuts ~ SGMLSubDocumentEntity meta => ENTITY
-                 | SGMLTextEntity meta => ENTITY
-                 | CharacterDataEntity meta => ENTITY
-                 | SpecificCharacterDataEntity meta => ENTITY
+SGMLDocumentGuts ~ SGMLSubDocumentEntity
+                 | SGMLTextEntity
+                 | CharacterDataEntity
+                 | SpecificCharacterDataEntity
                  | NonSGMLData
 SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee meta => ENTITY
 SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet Ee
 SGMLTextEntity ~ SGMLCharacter* Ee meta => TEXT
 CharacterDataEntity ~ SGMLCharacter* Ee meta => CDATA
-SpecificCharacterDataEntity ~ SGMLCharacter* Ee meta => PCDATA
+SpecificCharacterDataEntity ~ SGMLCharacter* Ee meta => SCDATA
 NonSGMLData ~ Character* Ee meta => CRUFT
 Prolog ~ OtherProlog* DTD DTDOP* LTDOP* meta => PROLOG
 DTDOP ~ DTD
-      | OtherProlog meta => PROLOG
+      | OtherProlog
 LTDOP ~ LTD
-      | OtherProlog meta => PROLOG
+      | OtherProlog
 OtherProlog ~ CommentDeclaration
             | ProcessingInstruction
-            | s meta => SPACE
+            | s
 DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
-Element ~ StartTag? Content EndTag?
-StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc
-         | MinimizedStartTag
+Element ~ StartTag? Content EndTag? meta => ELEMENT
+StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc meta => TAG bool:closed => yes
+         | MinimizedStartTag meta => TAG
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
-EmptyStartTag ~ stago tagc
-UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s*
-NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net
-EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc
-       | MinimizedEndTag
+EmptyStartTag ~ stago tagc bool:closed => yes
+UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* bool:closed => no
+NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net bool:closed => yes
+EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc meta => TAG bool:closed => yes
+       | MinimizedEndTag meta => TAG
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
                 | NullEndTag
-EmptyEndTag ~ etago tagc
-UnclosedEndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s*
-NullEndTag ~ net
-Content ~ MixedContent*
-        | ElementContent*
-        | ReplaceableCharacterData*
-        | CharacterData
+EmptyEndTag ~ etago tagc bool:closed => yes
+UnclosedEndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* bool:closed => no
+NullEndTag ~ net bool:closed => yes
+Content ~ MixedContent* meta => CONTENT
+        | ElementContent* meta => CONTENT
+        | ReplaceableCharacterData* meta => CONTENT
+        | CharacterData meta => CONTENT
 MixedContent ~ DataCharacter
              | Element
              | OtherContent
@@ -149,19 +149,19 @@ Name ~ NameStartCharacter NameCharacter
 Number ~ Digit+
 NameToken ~ NameCharacter
 NumberToken ~ Digit NameCharacter
-GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd meta => GENERAL
-ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd meta => PARAM
+GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd meta => GREF
+ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd meta => PREF
 ReferenceEnd ~ refc
              | refc RE
-CharacterReference ~ cro FunctionName ReferenceEnd
-                   | cro CharacterNumber ReferenceEnd
+CharacterReference ~ cro FunctionName ReferenceEnd meta => CREF bool:numeric => no
+                   | cro CharacterNumber ReferenceEnd meta => CREF bool:numeric => yes
 FunctionName ~ 'RE'
              | 'RS'
              | 'SPACE'
              | Name
 CharacterNumber ~ Number
-ParameterLiteral ~ lit ReplaceableParameterData* lit
-                 | lita ReplaceableParameterData* lita
+ParameterLiteral ~ lit ReplaceableParameterData* lit meta => RPDATA
+                 | lita ReplaceableParameterData* lita meta => RPDATA
 ReplaceableParameterData ~ DataCharacter
                          | CharacterReference
                          | ParameterEntityReference
@@ -314,8 +314,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc
-                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc
+AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc meta => ATTLIST
+                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc meta => ATTLIST
 AttributeDefinition ~ ps+ AttributeName ps+ DeclaredValue ps+ DefaultValue
 AttributeName ~ Name
 DeclaredValue ~ 'CDATA'
@@ -494,7 +494,7 @@ SystemDeclaration ~ mdo 'SYSTEM' ps+ MinimumLiteral
                                  ps+ ValidationServices
                                  ps+ SDIFSupport
                                  ps*
-                    mdc
+                    mdc meta => SYSTEM
 ConcreteSyntaxesSupported ~ ps+ ConcreteSyntax
                           | ps+ ConcreteSyntax ps+ ConcreteSyntaxChanges
 ConcreteSyntaxChanges ~ 'CHANGES' ps+ 'SWITCHES'
@@ -565,7 +565,7 @@ shortref ~ '&#TAB;'
          | '|'
          | '}'
          | '~'
-vi ~ '='
+vi ~ '=' meta => VALUE_IS
 plus ~ '+'
 minus ~ '-'
 slashslash ~ '//'
@@ -595,3 +595,4 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
+Ee ~ [\b]
