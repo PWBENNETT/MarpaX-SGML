@@ -3,19 +3,19 @@ s ~ RE meta => SPACE
   | RS meta => SPACE
   | SPACE meta => SPACE
   | SEPCHAR meta => SPACE
-ps ~ s meta => SPACE
+ps ~ s
    | Ee meta => EE
-   | ParameterEntityReference meta => PARAM
-   | CommentDeclaration meta => COMMENT
-ts ~ s meta => SPACE
+   | ParameterEntityReference
+   | CommentDeclaration
+ts ~ s
    | Ee meta => EE
-   | ParameterEntityReference meta => PARAM
-ds ~ s meta => SPACE
+   | ParameterEntityReference
+ds ~ s
    | Ee meta => EE
-   | ParameterEntityReference meta => PARAM
-   | CommentDeclaration meta => COMMENT
-   | ProcessingInstruction meta => PI
-   | MarkedSectionDeclaration meta => MARKED
+   | ParameterEntityReference
+   | CommentDeclaration
+   | ProcessingInstruction
+   | MarkedSectionDeclaration
 SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument meta => TOP
 OpeningSystemDeclarationList ~ SystemDeclaration s+ meta => SYSTEM
 SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* meta => SGML
@@ -31,12 +31,12 @@ CharacterDataEntity ~ SGMLCharacter* Ee meta => CDATA
 SpecificCharacterDataEntity ~ SGMLCharacter* Ee meta => PCDATA
 NonSGMLData ~ Character* Ee meta => CRUFT
 Prolog ~ OtherProlog* DTD DTDOP* LTDOP* meta => PROLOG
-DTDOP ~ DTD meta => DTD
+DTDOP ~ DTD
       | OtherProlog meta => PROLOG
-LTDOP ~ LTD meta => LTD
+LTDOP ~ LTD
       | OtherProlog meta => PROLOG
-OtherProlog ~ CommentDeclaration meta => COMMENT
-            | ProcessingInstruction meta => PI
+OtherProlog ~ CommentDeclaration
+            | ProcessingInstruction
             | s meta => SPACE
 DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
@@ -113,7 +113,7 @@ NumberList ~ Number
            | Number SPACE NumberList
 NumberTokenList ~ NumberToken
                 | NumberToken SPACE NumberTokenList
-ProcessingInstruction ~ pio SystemData* pic
+ProcessingInstruction ~ pio SystemData* pic meta => PI
 SystemData ~ CharacterData
 ReplaceableCharacterData ~ DataCharacter
                          | CharacterReference
@@ -149,8 +149,8 @@ Name ~ NameStartCharacter NameCharacter
 Number ~ Digit+
 NameToken ~ NameCharacter
 NumberToken ~ Digit NameCharacter
-GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd
-ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd
+GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd meta => GENERAL
+ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd meta => PARAM
 ReferenceEnd ~ refc
              | refc RE
 CharacterReference ~ cro FunctionName ReferenceEnd
@@ -207,11 +207,11 @@ PublicTextDescription ~ ISOTextDescription
 ISOTextDescription ~ MinimumData
 PublicTextLanguage ~ Name
 PublicTextDesignatingSequence ~ Name
-CommentDeclaration ~ mdo CommentList? mdc
+CommentDeclaration ~ mdo CommentList? mdc meta => COMMENT
 CommentList ~ Comment s
             | Comment s CommentList
 Comment ~ com SGMLCharacter* com
-MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd
+MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd meta => MARKED
 MarkedSectionStart ~ mdo dso
 MarkedSectionEnd ~ msc mdc
 MarkedSection ~ SGMLCharacter*
@@ -246,7 +246,7 @@ EntityType ~ 'SUBDOC'
            | 'NDATA' ps+ NotationName DataAttributeSpecification
            | 'CDATA' ps+ NotationName DataAttributeSpecification
            | 'SDATA' ps+ NotationName DataAttributeSpecification
-DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc
+DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc meta => DTD
 OptionalEI ~ ps+ ExternalIdentifier
 WrappedDTDSubset ~ ps+ dso DTDSubset+ dsc
 DocumentTypeName ~ GenericIdentifier
@@ -353,7 +353,7 @@ ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* md
 AETGuts ~ ps+ AssociatedElementType
 MapSpecification ~ MapName
                  | rni 'EMPTY'
-LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc
+LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc meta => LTD
 LinkSpecification ~ SimpleLinkSpecification
                   | ImplicitLinkSpecification
                   | ExplicitLinkSpecification
