@@ -7,8 +7,11 @@ use Carp qw( cluck croak );
 use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
+use MarpaX::SGML::Logger;
 
 our @EXPORT_OK = qw( sgml );
+
+sub NOSUCH () { croak('Unimplemented'); }
 
 sub new {
     my $class = shift;
@@ -88,5 +91,17 @@ sub _libxml_parser {
     push @_, 'libxml';
     return _parser(@_);
 }
+
+#TODO: I think I'm going to have to invent some kind of XPath-like hybrod notation like :TAG[@closed=true]
+
+sub shortenUnclosedStartTags { NOSUCH; }
+sub shortenUnclosedEndTags { NOSUCH; }
+sub shortenUnmatchedStartTags { NOSUCH; }
+sub shortenUnmatchedEndTags { NOSUCH; }
+
+sub lengthenUnclosedStartTags { NOSUCH; }
+sub lengthenUnclosedEndTags { NOSUCH; }
+sub lengthenUnmatchedStartTags { NOSUCH; }
+sub lengthenUnmatchedEndTags { NOSUCH; }
 
 1;
