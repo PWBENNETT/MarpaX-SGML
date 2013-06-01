@@ -1,43 +1,43 @@
 :start ::= SystematizedDocument
-s ~ RE
-  | RS
-  | SPACE
-  | SEPCHAR
-ps ~ s
-   | Ee
-   | ParameterEntityReference
-   | CommentDeclaration
-ts ~ s
-   | Ee
-   | ParameterEntityReference
-ds ~ s
-   | Ee
-   | ParameterEntityReference
-   | CommentDeclaration
-   | ProcessingInstruction
-   | MarkedSectionDeclaration
-SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument
-OpeningSystemDeclarationList ~ SystemDeclaration s+
-SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts*
-SGMLDocumentGuts ~ SGMLSubDocumentEntity
-                 | SGMLTextEntity
-                 | CharacterDataEntity
-                 | SpecificCharacterDataEntity
+s ~ RE meta => SPACE
+  | RS meta => SPACE
+  | SPACE meta => SPACE
+  | SEPCHAR meta => SPACE
+ps ~ s meta => SPACE
+   | Ee meta => EE
+   | ParameterEntityReference meta => PARAM
+   | CommentDeclaration meta => COMMENT
+ts ~ s meta => SPACE
+   | Ee meta => EE
+   | ParameterEntityReference meta => PARAM
+ds ~ s meta => SPACE
+   | Ee meta => EE
+   | ParameterEntityReference meta => PARAM
+   | CommentDeclaration meta => COMMENT
+   | ProcessingInstruction meta => PI
+   | MarkedSectionDeclaration meta => MARKED
+SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument meta => TOP
+OpeningSystemDeclarationList ~ SystemDeclaration s+ meta => SYSTEM
+SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* meta => SGML
+SGMLDocumentGuts ~ SGMLSubDocumentEntity meta => ENTITY
+                 | SGMLTextEntity meta => ENTITY
+                 | CharacterDataEntity meta => ENTITY
+                 | SpecificCharacterDataEntity meta => ENTITY
                  | NonSGMLData
-SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee
+SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee meta => ENTITY
 SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet Ee
-SGMLTextEntity ~ SGMLCharacter* Ee
-CharacterDataEntity ~ SGMLCharacter* Ee
-SpecificCharacterDataEntity ~ SGMLCharacter* Ee
-NonSGMLData ~ Character* Ee
-Prolog ~ OtherProlog* DTD DTDOP* LTDOP*
-DTDOP ~ DTD
-      | OtherProlog
-LTDOP ~ LTD
-      | OtherProlog
-OtherProlog ~ CommentDeclaration
-            | ProcessingInstruction
-            | s
+SGMLTextEntity ~ SGMLCharacter* Ee meta => TEXT
+CharacterDataEntity ~ SGMLCharacter* Ee meta => CDATA
+SpecificCharacterDataEntity ~ SGMLCharacter* Ee meta => PCDATA
+NonSGMLData ~ Character* Ee meta => CRUFT
+Prolog ~ OtherProlog* DTD DTDOP* LTDOP* meta => PROLOG
+DTDOP ~ DTD meta => DTD
+      | OtherProlog meta => PROLOG
+LTDOP ~ LTD meta => LTD
+      | OtherProlog meta => PROLOG
+OtherProlog ~ CommentDeclaration meta => COMMENT
+            | ProcessingInstruction meta => PI
+            | s meta => SPACE
 DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
