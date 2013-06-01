@@ -42,16 +42,16 @@ DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
 Element ~ StartTag? Content EndTag? treat_as => ELEMENT
-StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2
-         | MinimizedStartTag treat_as => TAG
+StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2 @type => start
+         | MinimizedStartTag treat_as => TAG @type => start
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
 EmptyStartTag ~ stago tagc @closed => 1 @tagtype => ::undef
 UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* @closed => 0 @tagtype => $1$2
-NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net @closed => 1 @tagtype => $1
-EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2
-       | MinimizedEndTag treat_as => TAG
+NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net @closed => 1 @tagtype => $1 @matching => $1
+EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2 @type => end
+       | MinimizedEndTag treat_as => TAG @type => end
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
                 | NullEndTag
@@ -211,7 +211,7 @@ CommentDeclaration ~ mdo CommentList? mdc treat_as => COMMENT
 CommentList ~ Comment s
             | Comment s CommentList
 Comment ~ com SGMLCharacter* com
-MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd treat_as => MARKED
+MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd treat_as => DECL
 MarkedSectionStart ~ mdo dso
 MarkedSectionEnd ~ msc mdc
 MarkedSection ~ SGMLCharacter*
@@ -221,7 +221,7 @@ StatusKeyword ~ 'TEMP'
               | 'IGNORE'
               | 'INCLUDE'
               | 'RCDATA'
-EntityDeclaration ~ mdo 'ENTITY' ps+ EntityName ps+ EntityText ps+ mdc
+EntityDeclaration ~ mdo 'ENTITY' ps+ EntityName ps+ EntityText ps+ mdc treat_as => DECL
 EntityName ~ GeneralEntityName
            | ParameterEntityName
 GeneralEntityName ~ Name
@@ -263,8 +263,8 @@ ShortReferenceSet ~ EntityDeclaration
                   | ShortReferenceMappingDeclaration
                   | ShortReferenceUseDeclaration
                   | ds
-ElementDeclaration ~ mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ DeclaredContent mdc
-                   | mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ ContentModel mdc
+ElementDeclaration ~ mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ DeclaredContent mdc treat_as => DECL
+                   | mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ ContentModel mdc treat_as => DECL
 OTMGuts ~ ps+ OmittedTagMinimization
 ElementType ~ GenericIdentifier
             | NameGroup
@@ -314,8 +314,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc treat_as => ATTLIST
-                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc treat_as => ATTLIST
+AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc treat_as => DECL
+                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc treat_as => DECL
 AttributeDefinition ~ ps+ AttributeName ps+ DeclaredValue ps+ DefaultValue
 AttributeName ~ Name
 DeclaredValue ~ 'CDATA'
@@ -341,15 +341,15 @@ DVMagicMarker ~ 'REQUIRED'
               | 'CURRENT'
               | 'CONREF'
               | 'IMPLIED'
-NotationDeclaration ~ mdo 'NOTATION' ps+ NotationName ps+ NotationIdentifier ps* mdc
+NotationDeclaration ~ mdo 'NOTATION' ps+ NotationName ps+ NotationIdentifier ps* mdc treat_as => DECL
 NotationIdentifier ~ ExternalIdentifier
 AssociatedNotationName ~ rni 'NOTATION' ps+ NotationName
                        | rni 'NOTATION' ps+ NameGroup
 DataAttributeSpecification ~ ps+ dso AttributeSpecification+ s* dsc
-ShortReferenceMappingDeclaration ~ mdo 'SHORTREF' ps+ MapName PLNm+ ps* mdc
+ShortReferenceMappingDeclaration ~ mdo 'SHORTREF' ps+ MapName PLNm+ ps* mdc treat_as => DECL
 PLNm ~ ps+ ParameterLiteral ps+ Name
 MapName ~ Name
-ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* mdc
+ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* mdc treat_as => DECL
 AETGuts ~ ps+ AssociatedElementType
 MapSpecification ~ MapName
                  | rni 'EMPTY'
@@ -370,7 +370,7 @@ LinkyThing ~ LinkAttributeSet
            | LinkSetDeclaration
 LinkAttributeSet ~ AttributeDefinitionListDeclaration
                  | EntitySet
-LinkSetDeclaration ~ mdo 'LINK' ps+ LinkSetName ps+ LinkRule ps* mdc
+LinkSetDeclaration ~ mdo 'LINK' ps+ LinkSetName ps+ LinkRule ps* mdc treat_as => DECL
 LinkRule ~ SourceElementSpecification
          | ExplicitLinkRule
 LinkSetName ~ Name
@@ -386,7 +386,7 @@ ExplicitLinkRule ~ SourceElementSpecification ps+ ResultElementSpecification
                  | rni 'IMPLIED' ps+ ResultElementSpecification
 ResultElementSpecification ~ GenericIdentifier ResultAttributeSpecification?
 ResultAttributeSpecification ~ s+ dso AttributeSpecification+ dsc
-IDLinkSetDeclaration ~ mdo 'USELINK' ps+ LinkSetSpecification ps+ LinkTypeName ps* mdc
+IDLinkSetDeclaration ~ mdo 'USELINK' ps+ LinkSetSpecification ps+ LinkTypeName ps* mdc treat_as => DECL
 LinkSetSpecification ~ LinkSetName
                      | rni 'EMPTY'
                      | rni 'RESTORE'
@@ -398,7 +398,7 @@ SGMLDeclaration ~ mdo 'SGML' ps+ MinimumLiteral
                              ps+ FeatureUse
                              ps+ ApplicationSpecificInformation
                              ps*
-                  mdc
+                  mdc treat_as => DECL
 DocumentCharacterSet ~ 'CHARSET' CharacterSetDescription+
 CharacterSetDescription ~ ps+ BaseCharacterSet ps+ DescribedCharacterSetPortion
 BaseCharacterSet ~ 'BASESET' ps+ PublicIdentifier
@@ -494,7 +494,7 @@ SystemDeclaration ~ mdo 'SYSTEM' ps+ MinimumLiteral
                                  ps+ ValidationServices
                                  ps+ SDIFSupport
                                  ps*
-                    mdc treat_as => SYSTEM
+                    mdc treat_as => DECL
 ConcreteSyntaxesSupported ~ ps+ ConcreteSyntax
                           | ps+ ConcreteSyntax ps+ ConcreteSyntaxChanges
 ConcreteSyntaxChanges ~ 'CHANGES' ps+ 'SWITCHES'

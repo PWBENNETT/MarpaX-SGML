@@ -133,4 +133,15 @@ sub _does_tag_apply {
     return eval($tattr);
 }
 
+sub PI {
+    my $self = shift;
+    my ($pi) = @_;
+    my $class = ref($self) . '::' . (split /\s+/, $pi)[0];
+    eval("require $class") or return;
+    my $processor = $class->new();
+    return $processor->process($self);
+}
+
+sub SYSTEM { return PI(@_); }
+
 1;
