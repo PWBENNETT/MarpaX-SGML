@@ -122,14 +122,14 @@ sub _does_rule_apply {
 
 sub _does_tag_apply {
     my ($piece, $tag) = @_;
-    return 1 if $rule eq '*';
-    return unless $rule =~ /^([^:]\w+)((?:\[).+?(?:\]))?$/;
-    my ($rtype, $rattr) = ($1, $2);
-    return unless substr(ref($piece), -length($rtype)) eq $rtype;
-    return 1 unless $rattr;
-    $rattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
-    $rattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
-    return eval($rattr);
+    return 1 if $tag eq '*';
+    return unless $tag =~ /^([^:]\w+)((?:\[).+?(?:\]))?$/;
+    my ($ttype, $tattr) = ($1, $2);
+    return unless substr(ref($piece), -length($ttype)) eq $ttype;
+    return 1 unless $tattr;
+    $tattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
+    $tattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
+    return eval($tattr);
 }
 
 1;
