@@ -125,7 +125,8 @@ sub _does_tag_apply {
     return 1 if $tag eq '*';
     return unless $tag =~ /^([^:]\w+)((?:\[).+?(?:\]))?$/;
     my ($ttype, $tattr) = ($1, $2);
-    return unless substr(ref($piece), -length($ttype)) eq $ttype;
+    return unless ref($piece) =~ /:TAG$/;
+    return unless $piece->{ tagtype } eq $ttype;
     return 1 unless $tattr;
     $tattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
     $tattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
