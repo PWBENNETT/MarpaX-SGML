@@ -8,10 +8,22 @@ use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
 
-our @EXPORT_OK = qw( parse sgml libxml );
+our @EXPORT_OK = qw( parse sgml libxml shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI );
+our %EXPORT_TAGS = (':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )]);
 
 sub true () { return 1; }
 sub false () { return; }
+
+sub shortenUnmatchedStartTags () { return (':TAG[@type="start" and @matched=false]' => \&_as_short_as_possible); }
+sub shortenUnmatchedEndTags () { return (':TAG[@type="end" and @matched=false]' => \&_as_short_as_possible); }
+
+sub lengthenUnmatchedStartTags () { return (':TAG[@type="start" and @matched=false]' => \&_as_long_as_possible); }
+sub lengthenUnmatchedEndTags () { return (':TAG[@type="end" and @matched=false]' => \&_as_long_as_possible); }
+
+sub fullyTagged () { return (':DTD' => \&_ensure_fully_tagged); }
+sub integrallyStored () { return (':ELEMENT' => \&_ensure_integrally_stored); }
+
+sub xmlPI () { return (':TOP' => \&_ensure_xml_pi); }
 
 {
     my $Nothing = [];
@@ -42,8 +54,8 @@ sub parse {
     $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
     $class ||= __PACKAGE__;
     my $self = ref($class) ? $class : $class->new();
-    my ($datathing, $commandref, $parser) = @_;
-    $parser //= 'parser';
+    my ($datathing, @rest) = @_;
+    @rest = map { $_ = ref($_) eq 'HASH' ? %$_ : $_ } @rest;
     my $rawdata;
     if (ref $datathing eq 'SCALAR') {
         $rawdata = $$datathing;
@@ -51,11 +63,10 @@ sub parse {
     elsif (my $source = eval { io($rawdata) }) {
         $rawdata = $source->slurp();
     }
-    $self->{ commands } = $commandref;
-    $self->$parser()->{ controller } = $self;
-    $self->$parser()->read($rawdata);
-    my $rv = $self->$parser()->value();
-    return (ref $datathing eq 'SCALAR') ? \$rv : $rv;
+    $self->{ commands } = [ @rest ];
+    $self->parser()->{ controller } = $self;
+    $self->parser()->read($rawdata);
+    return $self->parser()->value();
 }
 
 sub sgml {
@@ -73,9 +84,7 @@ sub libxml {
     $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
     $class ||= __PACKAGE__;
     my $self = ref($class) ? $class : $class->new();
-    my $want_ref = !!ref($_[0]);
-    my $ast = $self->parse(@_);
-    return $want_ref ? \($ast->toLibXML()) : $ast->toLibXML();
+    return $self->parse(@_, fullyTagged, integrallyStored, xmlPI)->toLibXML();
 }
 
 sub ebnf {
@@ -89,25 +98,12 @@ sub parser {
     $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
     $class ||= __PACKAGE__;
     my $self = ref($class) ? $class : $class->new();
-    my ($key) = @_;
-    $key //= 'object';
-    my $ebnf = $self->_derive_grammar($self->ebnf(), $key);
-    if (!$self->{ G }->{ $key }) {
-        $self->{ G }->{ $key } = Marpa::R2::Scanless::G->new({ bless_package => 'MarpaX::SGML::Actions', source => $ebnf });
+    if (!$self->{ G }) {
+        $self->{ G } = Marpa::R2::Scanless::G->new({ bless_package => 'MarpaX::SGML::Actions', source => $self->ebnf() });
     }
-    $self->{ R } ||= Marpa::R2::Scanless::R->new($self->{ G }->{ $key });
+    $self->{ R } ||= Marpa::R2::Scanless::R->new($self->{ G });
     return $self->{ R };
 }
-
-sub shortenUnclosedStartTags { return (':TAG[@type="start" and @closed=false]' => \&_as_short_as_possible); }
-sub shortenUnclosedEndTags { return (':TAG[@type="end" and @closed=false]' => \&_as_short_as_possible); }
-sub shortenUnmatchedStartTags { return (':TAG[@type="start" and @matched=false]' => \&_as_short_as_possible); }
-sub shortenUnmatchedEndTags { return (':TAG[@type="end" and @matched=false]' => \&_as_short_as_possible); }
-
-sub lengthenUnclosedStartTags { return (':TAG[@type="start" and @closed=false]' => \&_as_long_as_possible); }
-sub lengthenUnclosedEndTags { return (':TAG[@type="end" and @closed=false]' => \&_as_long_as_possible); }
-sub lengthenUnmatchedStartTags { return (':TAG[@type="start" and @matched=false]' => \&_as_long_as_possible); }
-sub lengthenUnmatchedEndTags { return (':TAG[@type="end" and @matched=false]' => \&_as_long_as_possible); }
 
 sub _does_rule_apply {
     my ($piece, $rule) = @_;

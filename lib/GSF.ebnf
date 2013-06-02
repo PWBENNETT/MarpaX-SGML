@@ -1,3 +1,5 @@
+:default ::= action => [values] bless => ::lhs
+lexeme default = action => [start,length,value] bless => ::name
 :start ::= Document
 :discard ~ whitespace
 :discard ~ Comment
@@ -9,7 +11,8 @@ ShebangParamList ~ ShebangParam ' ' ShebangParamList
 ShebangParam ~ [\p{Graph}]+
 LanguageDeclaration ~ '#language ' URI ';'
 Body ::= Pragma* DefaultRelationDeclaration? Pragma* ElementList ';'?
-Subset ::= '{' Body '}' Transformed*
+Subset ::= WrappedBody Transformed*
+WrappedBody ::= '{' Body '}' assoc => group
 Transformed ::= modifiedby Transform
 Pragma ~ PragmaBody ';'
 PragmaBody ~ '#include ' FileURL
@@ -17,45 +20,49 @@ PragmaBody ~ '#include ' FileURL
            | '#layout ' FileURI
            | '#glyphs ' FileURL
 DefaultRelationDeclaration ~ '#using ' RelationID ';'
-FileURL ~ quo FilePath quo
+FileURL ~ quo FilePath quo assoc => group
         | URL
-FileURI ~ quo FilePath quo
+FileURI ~ quo FilePath quo assoc => group
         | URI
 FilePath ~ RelativeFilePath
          | AbsoluteFilePath
 AbsoluteFilePath ~ FSRoot RelativeFilePath
 RelativeFilePath ~ PathPart PathContinuation* PathSep Filename
 PathContinuation ~ PathSep PathPart
+URI ~ URSpec+ [^:\s] [\S]*
+URL ~ URSpec [^:\s] [\S]*
+URSpec ~ [\w]+ ':'
 Element ::= Declaration
           | Graph
           | Subset
 ElementList ::= Element ';' ElementList
               | Element
-Comment ~ '/*' any '*/'
+Comment ~ '/*' any '*/' assoc => group
 Declaration ::= Variable equals Subset
               | Variable equals Clause
+              | Variable equals Graph
               | Macro copies Subset
               | Macro copies Clause
+              | Macro copies Graph
               | TransformID lookslike TransformDef
               | AppearanceID lookslike AppearanceDef
               | InterfaceID lookslike InterfaceDef
               | RelationID has Appearance DerivedAppearance*
               | GlyphID has Profile DerivedProfile*
-              | RelationID is RelationID DerivedAppearance+
-              | GlyphID is GlyphID DerivedProfile+
+              | RelationID is RelationID DerivedAppearance+ Transformed*
+              | GlyphID is GlyphID DerivedProfile+ Transformed*
 Profile ::= Appearance
           | Interface
 DerivedProfile ~ with_without Appearance
                | with_without Interface
-               | Transformed
 with_without ~ with
              | without
-DerivedAppearance ::= with_without Appearance
-InterfaceDef ::= '(' PortList ')'
+DerivedAppearance ~ with_without Appearance
+InterfaceDef ::= '(' PortList ')' assoc => group
 PortList ::= Port ',' PortList
            | Port
-AppearanceDef ::= '[' FeatureList ']'
-FeatureList ::= Feature ' ' FeatureList
+AppearanceDef ::= '[' FeatureList ']' assoc => group
+FeatureList ::= Feature FeatureList
               | Feature
 Transform ::= TransformID
             | TransformDef
@@ -68,47 +75,44 @@ MiddleEdge ::= MHS Edge MiddleEdge
              | MHS Edge
 LHS ::= LHSJoin
       | Joinable ParenedLHSJoin?
-ParenedLHSJoin ::= '(' LHSJoin ')'
+ParenedLHSJoin ::= '(' LHSJoin ')' assoc => group
 LHSJoin ::= Glyph Join?
 MHS ::= Join? Glyph Join?
       | ParenedRHSJoin? Joinable ParenedLHSJoin?
 RHS ::= RHSJoin
       | ParenedRHSJoin? Joinable
-ParenedRHSJoin ::= '(' RHSJoin ')'
+ParenedRHSJoin ::= '(' RHSJoin ')' assoc => group
 RHSJoin ::= Join? Glyph
-Join ::= '(' Port ')'
+Join ::= '(' Port ')' assoc => group
 Joinable ::= Clause
            | Reference
 Glyph ::= GlyphID
         | Reference
 Reference ::= Macro
             | Variable
-Edge ::= RelSource Relationship RelTarget
+Edge ::= RelSource Relationship RelTarget assoc => group
        | DefaultRelation
-DefaultRelation ::= '->'
-                  | '-->'
-                  | '<->'
-                  | '<-->'
-RelSource ::= '-['
-            | '--['
-            | '<-['
-RelTarget ::= ']->'
+DefaultRelation ~ '->' bless => DefaultRelation
+                | '<->' bless => DefaultRelationBidi
+RelSource ~ '-[' bless => RelSource
+          | '<-[' bless => RelSourceBidi
+RelTarget ~ ']->'
 Relationship ::= RelationIDList
-               | Relationship with_without Appearance
+               | Relationship DerivedAppearance
 RelationIDList ::= RelationID ',' RelationIDList
                  | RelationID
-TransformDef ::= '[' IndividualTransformList ']'
+TransformDef ::= '[' IndividualTransformList ']' assoc => group
 IndividualTransformList ::= IndividualTransform ',' IndividualTransformList
                           | IndividualTransform
 IndividualTransform ::= Condition? TypedTransform
 Condition ::= FeatureExpression '?'
-TypedTransform ::= Relationship becomes Relationship
+TypedTransform ::= RelationID becomes RelationID
                  | Clause becomes Clause
                  | Graph becomes Graph
                  | AppearanceSource? Appearance
 AppearanceSource ::= Appearance becomes
 FeatureExpression ::= FeatureExpressionList
-                    | '(' FeatureExpression ')'
+                    | '(' FeatureExpression ')' assoc => group
 FeatureExpressionList ::= DefiniteFeature 'or' FeatureExpression
                         | DefiniteFeature FeatureExpression
                         | DefiniteFeature
@@ -116,7 +120,8 @@ Feature ::= DefiniteFeature
           | undef FeatureID
 DefiniteFeature ::= set FeatureID
                   | clear FeatureID
-Clause ::= '(' GraphList ')' Transformed*
+Clause ::= WrappedGraphList Transformed*
+WrappedGraphList ::= '(' GraphList ')' assoc => group
 GraphList ::= Graph ',' GraphList
             | Graph
 Variable ~ PfxVariable Name
@@ -166,8 +171,8 @@ copies ~ ':'
 lookslike ~ '~'
 has ~ 'has'
 is ~ 'is'
-with ~ '+'
-without ~ '-'
+with ~ ' +'
+without ~ ' -'
 set ~ '+'
 clear ~ '-'
 undef ~ '~'
