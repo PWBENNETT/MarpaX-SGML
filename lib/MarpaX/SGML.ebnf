@@ -1,8 +1,10 @@
+:default ::= action => [values] bless => ::lhs
+lexeme default = action => [start,length,value] bless => ::name
 :start ::= SystematizedDocument
-s ~ RE treat_as => WHITESPACE
-  | RS treat_as => WHITESPACE
-  | SPACE treat_as => WHITESPACE
-  | SEPCHAR treat_as => WHITESPACE
+s ~ RE
+  | RS
+  | SPACE
+  | SEPCHAR
 ps ~ s
    | Ee
    | ParameterEntityReference
@@ -16,9 +18,9 @@ ds ~ s
    | CommentDeclaration
    | ProcessingInstruction
    | MarkedSectionDeclaration
-SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument treat_as => TOP
+SystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument bless => TOP
 OpeningSystemDeclarationList ~ SystemDeclaration s+
-SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* treat_as => DOCUMENT
+SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* bless => DOCUMENT
 SGMLDocumentGuts ~ SGMLSubDocumentEntity
                  | SGMLTextEntity
                  | CharacterDataEntity
@@ -26,11 +28,11 @@ SGMLDocumentGuts ~ SGMLSubDocumentEntity
                  | NonSGMLData
 SGMLDocumentEntity ~ s* SGMLDeclaration Prolog DocumentInstanceSet Ee
 SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet Ee
-SGMLTextEntity ~ SGMLCharacter* Ee treat_as => TEXT
-CharacterDataEntity ~ SGMLCharacter* Ee treat_as => CDATA
-SpecificCharacterDataEntity ~ SGMLCharacter* Ee treat_as => SCDATA
-NonSGMLData ~ Character* Ee treat_as => CRUFT
-Prolog ~ OtherProlog* DTD DTDOP* LTDOP* treat_as => PROLOG
+SGMLTextEntity ~ SGMLCharacter* Ee bless => TEXT
+CharacterDataEntity ~ SGMLCharacter* Ee bless => CDATA
+SpecificCharacterDataEntity ~ SGMLCharacter* Ee bless => CDATA
+NonSGMLData ~ Character* Ee bless => CRUFT
+Prolog ~ OtherProlog* DTD DTDOP* LTDOP* bless => PROLOG
 DTDOP ~ DTD
       | OtherProlog
 LTDOP ~ LTD
@@ -41,30 +43,32 @@ OtherProlog ~ CommentDeclaration
 DocumentInstanceSet ~ BaseDocumentElement OtherProlog*
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
-Element ~ StartTag? Content EndTag? treat_as => ELEMENT
-StartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2 @type => start
-         | MinimizedStartTag treat_as => TAG @type => start
+Element ~ StartTag? Content EndTag? bless => ELEMENT assoc => group
+StartTag ~ stago TagType AttributeSpecification+ s* tagc bless => TAG @closed => 1 @type => start assoc => group
+         | MinimizedStartTag bless => TAG @type => start
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
-EmptyStartTag ~ stago tagc @closed => 1 @tagtype => ::undef
-UnclosedStartTag ~ stago DocumentTypeSpecification GenericIdentifierSpeficication AttributeSpecification+ s* @closed => 0 @tagtype => $1$2
-NetEnablingStartTag ~ stago GenericIdentifierSpeficication AttributeSpecification+ s* net @closed => 1 @tagtype => $1 @matching => $1
-EndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* tagc treat_as => TAG @closed => 1 @tagtype => $1$2 @type => end
-       | MinimizedEndTag treat_as => TAG @type => end
+EmptyStartTag ~ stago tagc @closed => 1
+UnclosedStartTag ~ stago TagType AttributeSpecification+ s* @closed => 0
+NetEnablingStartTag ~ stago NetTagType AttributeSpecification+ s* net @closed => 1 @matching => $1
+EndTag ~ etago TagType s* tagc bless => TAG @closed => 1 @type => end assoc => group
+       | MinimizedEndTag bless => TAG @type => end
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
                 | NullEndTag
-EmptyEndTag ~ etago tagc @closed => 1 @tagtype => ::undef
-UnclosedEndTag ~ etago DocumentTypeSpecification GenericIdentifierSpeficication s* @closed => 0 @tagtype => $1$2
-NullEndTag ~ net @closed => 1 @tagtype => ::matching
+EmptyEndTag ~ etago tagc @closed => 1
+UnclosedEndTag ~ etago TagType s* @closed => 0
+NullEndTag ~ net @closed => 1
+TagType ~ DocumentTypeSpecification GenericIdentifierSpecification
+NetTagType ~ GenericIdentifierSpecification bless => TagType
 Content ~ MixedContent*
         | ElementContent*
         | ReplaceableCharacterData*
-        | CharacterData treat_as => CDATA
-MixedContent ~ DataCharacter treat_as => PCDATA
-             | Element treat_as => PCDATA
-             | OtherContent treat_as => PCDATA
+        | CharacterData bless => CDATA
+MixedContent ~ DataCharacter bless => PCDATA
+             | Element bless => PCDATA
+             | OtherContent bless => PCDATA
 ElementContent ~ Element
                | OtherContent
                | s
@@ -78,15 +82,15 @@ OtherContent ~ CommentDeclaration
              | MarkedSectionDeclaration
              | Ee
 DocumentTypeSpecification ~ NameGroup?
-GenericIdentifierSpeficication ~ GenericIdentifier
+GenericIdentifierSpecification ~ GenericIdentifier
                                | RankStem
 GenericIdentifier ~ Name
-AttributeSpecification ~ s* Name s* vi s* AttributeValueSpecification treat_as => ATTRIBUTE
-                       | s* AttributeValueSpecification
-AttributeValueSpecification ~ AttributeValue treat_as => ATTRVAL
-                            | AttributeValueLiteral treat_as => ATTRVAL
-AttributeValueLiteral ~ lit ReplaceableCharacterData* lit @literal => 1 @quoted => 1
-                      | lita ReplaceableCharacterData* lita @literal => 1 @quoted => 1
+AttributeSpecification ~ s* Name s* vi s* AttributeValueSpecification bless => ATTRIBUTE
+                       | s* AttributeValueSpecification bless => ATTRIBUTE
+AttributeValueSpecification ~ AttributeValue bless => ATTRVAL
+                            | AttributeValueLiteral bless => ATTRVAL
+AttributeValueLiteral ~ lit ReplaceableCharacterData* lit @literal => 1 @quoted => 1 assoc => group
+                      | lita ReplaceableCharacterData* lita @literal => 1 @quoted => 1 assoc => group
 AttributeValue ~ CharacterData
                | GeneralEntityName
                | GeneralEntityNameList
@@ -113,16 +117,16 @@ NumberList ~ Number
            | Number SPACE NumberList
 NumberTokenList ~ NumberToken
                 | NumberToken SPACE NumberTokenList
-ProcessingInstruction ~ pio SystemData* pic treat_as => PI
+ProcessingInstruction ~ pio SystemData* pic bless => PI
 SystemData ~ CharacterData
-ReplaceableCharacterData ~ DataCharacter treat_as => RCDATA
-                         | CharacterReference treat_as => RCDATA
-                         | GeneralEntityReference treat_as => RCDATA
-                         | Ee treat_as => RCDATA
-CharacterData ~ DataCharacter+
-DataCharacter ~ SGMLCharacter treat_as => DATA
+ReplaceableCharacterData ~ DataCharacter bless => RCDATA
+                         | CharacterReference bless => RCDATA
+                         | GeneralEntityReference bless => RCDATA
+                         | Ee bless => RCDATA
+CharacterData ~ DataCharacter+ bless => CDATA
+DataCharacter ~ SGMLCharacter
 Character ~ SGMLCharacter
-          | NONSGML treat_as => CRUFT
+          | NONSGML bless => CRUFT
 SGMLCharacter ~ MarkupCharacter
               | DATACHAR
 MarkupCharacter ~ NameCharacter
@@ -145,28 +149,28 @@ FunctionCharacter ~ RE
                   | MSICHAR
                   | MSSCHAR
                   | FUNCHAR
-Name ~ NameStartCharacter NameCharacter treat_as => NAME
-Number ~ Digit+ treat_as => NUMBER
-NameToken ~ NameCharacter treat_as => TOKEN
-NumberToken ~ Digit NameCharacter treat_as => TOKEN
-GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd treat_as => GREF
-ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd treat_as => PREF
+Name ~ NameStartCharacter NameCharacter bless => NAME
+Number ~ Digit+ bless => NUMBER
+NameToken ~ NameCharacter bless => TOKEN
+NumberToken ~ Digit NameCharacter bless => TOKEN
+GeneralEntityReference ~ ero DocumentTypeSpecification Name ReferenceEnd bless => REF assoc => group @closed => 1
+ParameterEntityReference ~ pero DocumentTypeSpecification Name ReferenceEnd bless => REF assoc => group @closed => 1
 ReferenceEnd ~ refc
              | refc RE
-CharacterReference ~ cro FunctionName ReferenceEnd treat_as => CREF @numeric => 0
-                   | cro CharacterNumber ReferenceEnd treat_as => CREF @numeric => 1
+CharacterReference ~ cro FunctionName ReferenceEnd bless => CREF @numeric => 0 assoc => group @closed => 1
+                   | cro CharacterNumber ReferenceEnd bless => CREF @numeric => 1 assoc => group @closed => 1
 FunctionName ~ 'RE'
              | 'RS'
              | 'SPACE'
              | Name
 CharacterNumber ~ Number
-ParameterLiteral ~ lit ReplaceableParameterData* lit @literal => 1 @quoted => 1
-                 | lita ReplaceableParameterData* lita @literal => 1 @quoted => 1
+ParameterLiteral ~ lit ReplaceableParameterData* lit @literal => 1 @quoted => 1 assoc => group
+                 | lita ReplaceableParameterData* lita @literal => 1 @quoted => 1 assoc => group
 ReplaceableParameterData ~ DataCharacter
                          | CharacterReference
                          | ParameterEntityReference
                          | Ee
-NameTokenGroup ~ grpo ts* NameToken NameTokenGroupGuts* ts* grpc
+NameTokenGroup ~ grpo ts* NameToken NameTokenGroupGuts* ts* grpc assoc => group @closed => 1
 NameTokenGroupGuts ~ ts* Connector NameToken
 NameGroup ~ grpo ts* Name NameGroupGuts* ts* grpc
 NameGroupGuts ~ ts* Connector Name
@@ -177,10 +181,10 @@ ExternalIdentifier ~ 'SYSTEM'
                    | 'SYSTEM' ps+ SystemIdentifier
                    | 'PUBLIC' ps+ PublicIdentifier ps+ SystemIdentifier
 PublicIdentifier ~ MinimumLiteral
-SystemIdentifier ~ lit SystemData* lit
-                 | lita SystemData* lita
-MinimumLiteral ~ lit MinimumData lit
-               | lita MinimumData lita
+SystemIdentifier ~ lit SystemData* lit @literal => 1 @quoted => 1 assoc => group
+                 | lita SystemData* lita @literal => 1 @quoted => 1 assoc => group
+MinimumLiteral ~ lit MinimumData lit @literal => 1 @quoted => 1 assoc => group
+               | lita MinimumData lita @literal => 1 @quoted => 1 assoc => group
 MinimumData ~ MinimumDataCharacter+
 MinimumDataCharacter ~ RS
                      | RE
@@ -207,11 +211,11 @@ PublicTextDescription ~ ISOTextDescription
 ISOTextDescription ~ MinimumData
 PublicTextLanguage ~ Name
 PublicTextDesignatingSequence ~ Name
-CommentDeclaration ~ mdo CommentList? mdc treat_as => COMMENT
+CommentDeclaration ~ mdo CommentList? mdc bless => COMMENT assoc => group
 CommentList ~ Comment s
             | Comment s CommentList
-Comment ~ com SGMLCharacter* com
-MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd treat_as => DECL
+Comment ~ com SGMLCharacter* com assoc => group
+MarkedSectionDeclaration ~ MarkedSectionStart StatusKeywordSpecification dso MarkedSection MarkedSectionEnd bless => DECL assoc => group @closed => 1
 MarkedSectionStart ~ mdo dso
 MarkedSectionEnd ~ msc mdc
 MarkedSection ~ SGMLCharacter*
@@ -221,7 +225,7 @@ StatusKeyword ~ 'TEMP'
               | 'IGNORE'
               | 'INCLUDE'
               | 'RCDATA'
-EntityDeclaration ~ mdo 'ENTITY' ps+ EntityName ps+ EntityText ps+ mdc treat_as => DECL
+EntityDeclaration ~ mdo 'ENTITY' ps+ EntityName ps+ EntityText ps+ mdc bless => DECL assoc => group @closed => 1
 EntityName ~ GeneralEntityName
            | ParameterEntityName
 GeneralEntityName ~ Name
@@ -246,9 +250,10 @@ EntityType ~ 'SUBDOC'
            | 'NDATA' ps+ NotationName DataAttributeSpecification
            | 'CDATA' ps+ NotationName DataAttributeSpecification
            | 'SDATA' ps+ NotationName DataAttributeSpecification
-DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc treat_as => DTD
+DTD ~ mdo 'DOCTYPE' ps+ DocumentTypeName OptionalEI? WrappedDTDSubset? ps* mdc bless => DTD assoc => group @closed => 1
 OptionalEI ~ ps+ ExternalIdentifier
-WrappedDTDSubset ~ ps+ dso DTDSubset+ dsc
+WrappedDTDSubset ~ ps+ WrappedDTDSubsetGuts
+WrappedDTDSubsetGuts ~ dso DTDSubset+ dsc assoc => group
 DocumentTypeName ~ GenericIdentifier
 DTDSubset ~ EntitySet+
           | ElementSet+
@@ -263,8 +268,8 @@ ShortReferenceSet ~ EntityDeclaration
                   | ShortReferenceMappingDeclaration
                   | ShortReferenceUseDeclaration
                   | ds
-ElementDeclaration ~ mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ DeclaredContent mdc treat_as => DECL
-                   | mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ ContentModel mdc treat_as => DECL
+ElementDeclaration ~ mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ DeclaredContent mdc bless => DECL assoc => group @closed => 1
+                   | mdo 'ELEMENT' ps+ ElementType OTMGuts? ps+ ContentModel mdc bless => DECL assoc => group @closed => 1
 OTMGuts ~ ps+ OmittedTagMinimization
 ElementType ~ GenericIdentifier
             | NameGroup
@@ -314,8 +319,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc treat_as => DECL
-                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc treat_as => DECL
+AttributeDefinitionListDeclaration ~ mdo 'ATTLIST' ps+ AssociatedElementType AttributeDefinition+ ps* mdc bless => DECL assoc => group
+                                   | mdo 'ATTLIST' ps+ AssociatedNotationName AttributeDefinition+ ps* mdc bless => DECL assoc => group
 AttributeDefinition ~ ps+ AttributeName ps+ DeclaredValue ps+ DefaultValue
 AttributeName ~ Name
 DeclaredValue ~ 'CDATA'
@@ -341,19 +346,19 @@ DVMagicMarker ~ 'REQUIRED'
               | 'CURRENT'
               | 'CONREF'
               | 'IMPLIED'
-NotationDeclaration ~ mdo 'NOTATION' ps+ NotationName ps+ NotationIdentifier ps* mdc treat_as => DECL
+NotationDeclaration ~ mdo 'NOTATION' ps+ NotationName ps+ NotationIdentifier ps* mdc bless => DECL assoc => group
 NotationIdentifier ~ ExternalIdentifier
 AssociatedNotationName ~ rni 'NOTATION' ps+ NotationName
                        | rni 'NOTATION' ps+ NameGroup
 DataAttributeSpecification ~ ps+ dso AttributeSpecification+ s* dsc
-ShortReferenceMappingDeclaration ~ mdo 'SHORTREF' ps+ MapName PLNm+ ps* mdc treat_as => DECL
+ShortReferenceMappingDeclaration ~ mdo 'SHORTREF' ps+ MapName PLNm+ ps* mdc bless => DECL assoc => group
 PLNm ~ ps+ ParameterLiteral ps+ Name
 MapName ~ Name
-ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* mdc treat_as => DECL
+ShortReferenceUseDeclaration ~ mdo 'USEMAP' ps+ MapSpecification AETGuts? ps* mdc bless => DECL assoc => group
 AETGuts ~ ps+ AssociatedElementType
 MapSpecification ~ MapName
                  | rni 'EMPTY'
-LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc treat_as => LTD
+LTD ~ mdo 'LINKTYPE' ps+ LinkTypeName ps+ LinkSpecification ExtIDGuts? WrappedLTDSubset? ps* mdc bless => LTD assoc => group
 LinkSpecification ~ SimpleLinkSpecification
                   | ImplicitLinkSpecification
                   | ExplicitLinkSpecification
@@ -370,7 +375,7 @@ LinkyThing ~ LinkAttributeSet
            | LinkSetDeclaration
 LinkAttributeSet ~ AttributeDefinitionListDeclaration
                  | EntitySet
-LinkSetDeclaration ~ mdo 'LINK' ps+ LinkSetName ps+ LinkRule ps* mdc treat_as => DECL
+LinkSetDeclaration ~ mdo 'LINK' ps+ LinkSetName ps+ LinkRule ps* mdc bless => DECL assoc => group
 LinkRule ~ SourceElementSpecification
          | ExplicitLinkRule
 LinkSetName ~ Name
@@ -386,7 +391,7 @@ ExplicitLinkRule ~ SourceElementSpecification ps+ ResultElementSpecification
                  | rni 'IMPLIED' ps+ ResultElementSpecification
 ResultElementSpecification ~ GenericIdentifier ResultAttributeSpecification?
 ResultAttributeSpecification ~ s+ dso AttributeSpecification+ dsc
-IDLinkSetDeclaration ~ mdo 'USELINK' ps+ LinkSetSpecification ps+ LinkTypeName ps* mdc treat_as => DECL
+IDLinkSetDeclaration ~ mdo 'USELINK' ps+ LinkSetSpecification ps+ LinkTypeName ps* mdc bless => DECL assoc => group
 LinkSetSpecification ~ LinkSetName
                      | rni 'EMPTY'
                      | rni 'RESTORE'
@@ -398,7 +403,7 @@ SGMLDeclaration ~ mdo 'SGML' ps+ MinimumLiteral
                              ps+ FeatureUse
                              ps+ ApplicationSpecificInformation
                              ps*
-                  mdc treat_as => DECL
+                  mdc bless => DECL assoc => group
 DocumentCharacterSet ~ 'CHARSET' CharacterSetDescription+
 CharacterSetDescription ~ ps+ BaseCharacterSet ps+ DescribedCharacterSetPortion
 BaseCharacterSet ~ 'BASESET' ps+ PublicIdentifier
@@ -494,7 +499,7 @@ SystemDeclaration ~ mdo 'SYSTEM' ps+ MinimumLiteral
                                  ps+ ValidationServices
                                  ps+ SDIFSupport
                                  ps*
-                    mdc treat_as => DECL
+                    mdc bless => DECL assoc => group
 ConcreteSyntaxesSupported ~ ps+ ConcreteSyntax
                           | ps+ ConcreteSyntax ps+ ConcreteSyntaxChanges
 ConcreteSyntaxChanges ~ 'CHANGES' ps+ 'SWITCHES'
@@ -511,10 +516,10 @@ ValidationServices ~ 'VALIDATE' ps+ 'GENERAL' ps+ Boolean
                                 ps+ 'FORMAL' ps+ Boolean
 SDIFSupport ~ 'SDIF' ps+ 'PACK' ps+ ASN1Boolean
                      ps+ 'UNPACK' ps+ ASN1Boolean
-RE ~ [\x{D}]
-RS ~ [\x{A}]
-SPACE ~ [\x{20}]
-SEPCHAR ~ [\x{9}]
+RE ~ [\x{D}] bless => WHITESPACE
+RS ~ [\x{A}] bless => WHITESPACE
+SPACE ~ [\x{20}] bless => WHITESPACE
+SEPCHAR ~ [\x{9}] bless => WHITESPACE
 LCLetter ~ [a-z]
 UCLetter ~ [A-Z]
 Digit ~ [0-9]
@@ -595,4 +600,4 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
-Ee ~ [\b] treat_as => EE
+Ee ~ [(?!:.)] bless => EE

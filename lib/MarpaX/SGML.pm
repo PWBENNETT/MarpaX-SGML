@@ -8,12 +8,10 @@ use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
 
-our @EXPORT_OK = qw( sgml );
+our @EXPORT_OK = qw( parse sgml libxml );
 
 sub true () { return 1; }
 sub false () { return; }
-
-sub NOSUCH () { croak('Unimplemented'); }
 
 {
     my $Nothing = [];
@@ -61,17 +59,29 @@ sub parse {
 }
 
 sub sgml {
-    push @_, '_sgml_parser';
-    return parse(@_);
+    my $class;
+    $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
+    $class ||= __PACKAGE__;
+    my $self = ref($class) ? $class : $class->new();
+    my $want_ref = !!ref($_[0]);
+    my $ast = $self->parse(@_);
+    return $want_ref ? \($ast->toString()) : $ast->toString();
 }
 
 sub libxml {
-    push @_, '_libxml_parser';
-    return parse(@_);
+    my $class;
+    $class = shift if eval { $_[0]->isa(__PACKAGE__) } || $_[0] eq __PACKAGE__;
+    $class ||= __PACKAGE__;
+    my $self = ref($class) ? $class : $class->new();
+    my $want_ref = !!ref($_[0]);
+    my $ast = $self->parse(@_);
+    return $want_ref ? \($ast->toLibXML()) : $ast->toLibXML();
 }
 
 sub ebnf {
-    return io('SGML.ebnf')->slurp();
+    my $path = io->catfile(split(/::/, __PACKAGE__))->relative()->filename() . '.pm';
+    my $location = io->catfile($INC{ $path })->updir()->canonpath();
+    return io->catfile($location, 'SGML.ebnf')->slurp();
 }
 
 sub parser {
@@ -83,20 +93,10 @@ sub parser {
     $key //= 'object';
     my $ebnf = $self->_derive_grammar($self->ebnf(), $key);
     if (!$self->{ G }->{ $key }) {
-        $self->{ G }->{ $key } = Marpa::R2::Scanless::G->new($ebnf);
+        $self->{ G }->{ $key } = Marpa::R2::Scanless::G->new({ bless_package => 'MarpaX::SGML::Actions', source => $ebnf });
     }
     $self->{ R } ||= Marpa::R2::Scanless::R->new($self->{ G }->{ $key });
     return $self->{ R };
-}
-
-sub _sgml_parser {
-    push @_, 'sgml';
-    return _parser(@_);
-}
-
-sub _libxml_parser {
-    push @_, 'libxml';
-    return _parser(@_);
 }
 
 sub shortenUnclosedStartTags { return (':TAG[@type="start" and @closed=false]' => \&_as_short_as_possible); }
@@ -132,16 +132,5 @@ sub _does_tag_apply {
     $tattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
     return eval($tattr);
 }
-
-sub PI {
-    my $self = shift;
-    my ($pi) = @_;
-    my $class = ref($self) . '::' . (split /\s+/, $pi)[0];
-    eval("require $class") or return;
-    my $processor = $class->new();
-    return $processor->process($self);
-}
-
-sub SYSTEM { return PI(@_); }
 
 1;

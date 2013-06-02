@@ -16,6 +16,64 @@
     <array>
         <dict>
             <key>begin</key>
+            <string>^(.+?)\s+(=)\s+</string>
+            <key>end</key>
+            <string>^(?!\s)</string>
+            <key>name</key>
+            <string>punctuation.section.scope.marpa</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>constant.language.marpa</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.variable.marpa</string>
+                </dict>
+            </dict>
+            <key>endCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>source.marpa</string>
+                </dict>
+            </dict>
+            <key>contentName</key>
+            <string>source.marpa</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>#adverb</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#quoted_literal</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#nonterminal</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#nonterminal_alternate</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#quantifier</string>
+               </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#regexp_brackets</string>
+               </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
             <string>^([^: ]\S*)\s+(::=|~)</string>
             <key>end</key>
             <string>^(?!\s)</string>
