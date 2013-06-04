@@ -8,8 +8,11 @@ use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
 
+our @EXPORT = qw( sgml );
 our @EXPORT_OK = qw( parse sgml libxml shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI );
-our %EXPORT_TAGS = (':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )]);
+our %EXPORT_TAGS = (
+    ':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )],
+);
 
 sub true () { return 1; }
 sub false () { return; }
@@ -36,17 +39,68 @@ sub new {
     return bless { }, $class;
 }
 
-sub set_system {
+sub add_system {
     my $self = shift;
-    if (@_) {
-        $self->{ system } = shift;
+    my ($sysname, $sysdoc) = @_;
+    $self->{ system } ||= { };
+    $self->{ system_order } ||= [ ];
+    if (!$self->{ system }->{ $sysname }) {
+        if (!$sysdoc) {
+            my $class
+                = eval("require $sysname") ? $sysname
+                : eval("require MarpaX::SGML::System::${sysname}") ? "MarpaX::SGML::System::${sysname}"
+                : croak("No such System")
+                ;
+            $sysdoc
+                = $class->can('new') ? $class->new($self)->system_document()
+                : $class->system_document()
+                ;
+        }
+        $self->{ system }->{ $sysname } = $sysdoc;
+        push @{$self->{ system_order }}, $sysname;
     }
+    return $self;
+}
+
+sub remove_system {
+    my $self = shift;
+    my ($sysname) = @_;
+    $self->{ system } ||= { };
+    $self->{ system_order } ||= [ ];
+    delete $self->{ system }->{ $sysname };
+    @{$self->{ system_order }} = grep { $_ ne $sysname } @{$self->{ system_order }};
+    return $self;
+}
+
+sub promote_system {
+    my $self = shift;
+    my ($sysname) = @_;
+    $self->{ system } ||= { };
+    $self->{ system_order } ||= [ ];
+    if (!$self->{ system }->{ $sysname }) {
+        croak("System `$sysname' is not (currently) part of this object");
+    }
+    @{$self->{ system_order }} = ($sysname, (grep { $_ ne $sysname } @{$self->{ system_order }}));
+    return $self;
+}
+
+sub demote_system {
+    my $self = shift;
+    my ($sysname) = @_;
+    $self->{ system } ||= { };
+    $self->{ system_order } ||= [ ];
+    if (!$self->{ system }->{ $sysname }) {
+        croak("System `$sysname' is not (currently) part of this object");
+    }
+    @{$self->{ system_order }} = ((grep { $_ ne $sysname } @{$self->{ system_order }}), $sysname);
     return $self;
 }
 
 sub get_system {
     my $self = shift;
-    return $self->{ system };
+    $self->{ system } ||= { };
+    $self->{ system_order } ||= [ ];
+    return join('', map { $self->{ system }->{ $_ } . pack('C2', (10, 13)) } @{$self->{ system_order }});
 }
 
 sub parse {
@@ -65,7 +119,7 @@ sub parse {
     }
     $self->{ commands } = [ @rest ];
     $self->parser()->{ controller } = $self;
-    $self->parser()->read($rawdata);
+    $self->parser()->read($self->get_system() . $rawdata);
     return $self->parser()->value();
 }
 
