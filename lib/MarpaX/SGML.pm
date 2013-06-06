@@ -144,7 +144,7 @@ sub libxml {
 sub ebnf {
     my $path = io->catfile(split(/::/, __PACKAGE__))->relative()->filename() . '.pm';
     my $location = io->catfile($INC{ $path })->updir()->canonpath();
-    return io->catfile($location, 'SGML.ebnf')->slurp();
+    return \(io->catfile($location, 'SGML.ebnf')->slurp());
 }
 
 sub parser {

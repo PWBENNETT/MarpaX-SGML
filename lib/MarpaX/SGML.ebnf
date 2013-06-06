@@ -51,7 +51,7 @@ MinimizedStartTag ~ EmptyStartTag
                   | NetEnablingStartTag
 EmptyStartTag ~ stago tagc @closed => 1
 UnclosedStartTag ~ stago TagType AttributeSpecification+ s* @closed => 0
-NetEnablingStartTag ~ stago NetTagType AttributeSpecification+ s* net @closed => 1 @matching => $1
+NetEnablingStartTag ~ stago NetTagType AttributeSpecification+ s* neto @closed => 1 @matching => $1
 EndTag ~ etago TagType s* tagc bless => TAG @closed => 1 @type => end assoc => group
        | MinimizedEndTag bless => TAG @type => end
 MinimizedEndTag ~ EmptyEndTag
@@ -59,7 +59,7 @@ MinimizedEndTag ~ EmptyEndTag
                 | NullEndTag
 EmptyEndTag ~ etago tagc @closed => 1
 UnclosedEndTag ~ etago TagType s* @closed => 0
-NullEndTag ~ net @closed => 1
+NullEndTag ~ netc @closed => 1
 TagType ~ DocumentTypeSpecification GenericIdentifierSpecification
 NetTagType ~ GenericIdentifierSpecification bless => TagType
 Content ~ MixedContent*
@@ -528,7 +528,8 @@ lita ~ [']
 Squo ~ [']
 stago ~ '<'
 tagc ~ '>'
-net ~ '/'
+neto ~ '/'
+netc ~ '/'
 etago ~ '</'
 pio ~ '<?'
 pic ~ '?>'
