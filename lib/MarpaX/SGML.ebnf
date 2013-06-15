@@ -18,7 +18,6 @@ ds ~ s
    | CommentDeclaration
    | ProcessingInstruction
    | MarkedSectionDeclaration
-<test 1> ~ boo
 PotentiallySystematizedDocument ~ OpeningSystemDeclarationList* SGMLDocument bless => TOP
 OpeningSystemDeclarationList ~ SystemDeclaration s+
 SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts* bless => DOCUMENT
