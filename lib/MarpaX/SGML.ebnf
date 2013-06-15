@@ -1,14 +1,14 @@
 :default ::= action => [values] bless => ::lhs
 lexeme default = action => [start,length,value] bless => ::name
 :start ::= PotentiallySystematizedDocument
-sAtom ~ RE
-      | RS
-      | SPACE
-      | SEPCHAR
+sAtom ::= ( RE )
+        | ( RS )
+        | ( SPACE )
+        | ( SEPCHAR )
 sStar ~ sAtom*
 s ~ sAtom+
-tsAtom ~ s
-       | Ee
+tsAtom ~ ( s )
+       | ( Ee )
        | ParameterEntityReference
 ts ~ tsAtom*
 psAtom ~ ts
@@ -18,9 +18,9 @@ ps ~ psAtom+
 ds ~ ps
    | ProcessingInstruction
    | MarkedSectionDeclaration
-PotentiallySystematizedDocument ~ OpeningSystemDeclaration SGMLDocument bless => TOP
-OpeningSystemDeclaration ~ sStar SystemDeclarationList s
-                         | Nothing
+PotentiallySystematizedDocument ~ OpeningSystemDeclarations SGMLDocument bless => TOP
+OpeningSystemDeclarations ~ sStar SystemDeclarationList s
+                          | Nothing
 SystemDeclarationList ::= SystemDeclaration* separator => s
 SGMLDocument ~ SGMLDocumentEntity SGMLDocumentGuts bless => DOCUMENT
 SGMLDocumentGuts ~ SGMLDocumentGutsAtom*
@@ -29,12 +29,12 @@ SGMLDocumentGutsAtom ~ SGMLSubDocumentEntity
                      | CharacterDataEntity
                      | SpecificCharacterDataEntity
                      | NonSGMLData
-SGMLDocumentEntity ~ sStar SGMLDeclaration Prolog DocumentInstanceSet Ee
-SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet Ee
-SGMLTextEntity ~ SGMLCharacter Ee bless => TEXT
-CharacterDataEntity ~ SGMLCharacter Ee bless => CDATA
-SpecificCharacterDataEntity ~ SGMLCharacter Ee bless => CDATA
-NonSGMLData ~ CharacterStar Ee bless => CRUFT
+SGMLDocumentEntity ~ sStar SGMLDeclaration Prolog DocumentInstanceSet ( Ee )
+SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet ( Ee )
+SGMLTextEntity ~ SGMLCharacter ( Ee ) bless => TEXT
+CharacterDataEntity ~ SGMLCharacter ( Ee ) bless => CDATA
+SpecificCharacterDataEntity ~ SGMLCharacter ( Ee ) bless => CDATA
+NonSGMLData ~ CharacterStar ( Ee ) bless => CRUFT
 Prolog ~ OptionalOtherPrologList DTD DTDOP LTDOP bless => PROLOG
 DTDOP ~ DTDOPAtom*
 DTDOPAtom ~ DTD
@@ -91,14 +91,14 @@ OtherContent ~ CommentDeclaration
              | CharacterReference
              | GeneralEntityReference
              | MarkedSectionDeclaration
-             | Ee
+             | ( Ee )
 DocumentTypeSpecification ~ NameGroup
                           | Nothing
 GenericIdentifierSpecification ~ GenericIdentifier
                                | RankStem
 GenericIdentifier ~ Name
 AttributeSpecifications ~ ( sStar ) AttributeSpecificationList
-AttributeSpecificationList ::= AttributeSpecification separator => sStar
+AttributeSpecificationList ::= AttributeSpecification* separator => sStar
 AttributeSpecification ::= Name ( sStar vi sStar ) AttributeValueSpecification bless => ATTRIBUTE
                          | Nothing AttributeValueSpecification bless => ATTRIBUTE
 AttributeValueSpecification ~ AttributeValue bless => ATTRVAL
@@ -138,7 +138,7 @@ ReplaceableCharacterData ~ ReplaceableCharacterDataAtom*
 ReplaceableCharacterDataAtom ~ DataCharacter bless => RCDATA
                              | CharacterReference bless => RCDATA
                              | GeneralEntityReference bless => RCDATA
-                             | Ee bless => RCDATA
+                             | ( Ee ) bless => RCDATA
 CharacterData ~ DataCharacterPlus bless => CDATA
 DataCharacterPlus ~ DataCharacter+
 DataCharacter ~ SGMLCharacterAtom
@@ -189,7 +189,7 @@ ReplaceableParameterData ~ ReplaceableParameterDataAtom*
 ReplaceableParameterDataAtom ~ DataCharacter
                              | CharacterReference
                              | ParameterEntityReference
-                             | Ee
+                             | ( Ee )
 NameTokenGroup ~ grpo ts NameToken NameTokenGroupGuts ts grpc assoc => group @closed => 1
 NameTokenGroupGuts ~ NameTokenGroupGuts*
 NameTokenGroupGuts ~ ts Connector NameToken
