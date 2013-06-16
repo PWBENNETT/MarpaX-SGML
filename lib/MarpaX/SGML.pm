@@ -164,7 +164,7 @@ sub _does_rule_apply {
     return 1 if $rule eq '*';
     return _does_tag_apply($piece, $rule) unless $rule =~ /^([:]\w+)((?:\[).+?(?:\]))?$/;
     my ($rtype, $rattr) = ($1, $2);
-    return unless substr(ref($piece), -length($rtype)) eq $rtype;
+    return unless substr($piece->{ isa }, -length($rtype)) eq $rtype;
     $rattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
     $rattr =~ s/\@(\w+)\s*=\s*(.+?)/\$piece->{'$1'} ~~ $2/g;
     return eval($rattr);
@@ -175,7 +175,7 @@ sub _does_tag_apply {
     return 1 if $tag eq '*';
     return unless $tag =~ /^([^:]\w+)((?:\[).+?(?:\]))?$/;
     my ($ttype, $tattr) = ($1, $2);
-    return unless ref($piece) =~ /:TAG$/;
+    return unless $piece->{ isa } =~ /:TAG$/;
     return unless $piece->{ tagtype } eq $ttype;
     return 1 unless $tattr;
     $tattr =~ s/\@(\w+)\s*(?!:=)/exists \$piece->{'$1'}/g;
