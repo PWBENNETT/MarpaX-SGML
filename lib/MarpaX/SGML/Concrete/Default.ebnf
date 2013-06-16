@@ -84,5 +84,3 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
-Ee ~ bless => EE
-Nothing ~
