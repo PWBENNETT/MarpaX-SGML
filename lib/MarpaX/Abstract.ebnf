@@ -60,7 +60,7 @@ MinimizedStartTag ~ EmptyStartTag
                   | NetEnablingStartTag
 EmptyStartTag ~ ( stago ) ( tagc )
 UnclosedStartTag ~ ( stago ) TagType AttributeSpecifications ( sStar )
-NetEnablingStartTag ~ ( stago ) NetTagType AttributeSpecifications ( sStar ) ( neto )  @matching => $1
+NetEnablingStartTag ~ ( stago ) NetTagType AttributeSpecifications ( sStar ) ( neto )
 EndTag ~ ( etago ) TagType ( sStar ) ( tagc ) @isa => TAG @type => end assoc => group
        | MinimizedEndTag @isa => TAG @type => end
 MinimizedEndTag ~ EmptyEndTag
@@ -73,7 +73,7 @@ TagType ~ DocumentTypeSpecification GenericIdentifierSpecification
 NetTagType ~ Nothing GenericIdentifierSpecification bless => TagType
 Content ~ MixedContent
         | ElementContent
-        | ReplaceableCharacterData
+        | ReplaceableCharacterData @isa => RCDATA
         | CharacterData @isa => CDATA
 MixedContent ~ MixedContentAtom*
 MixedContentAtom ~ DataCharacter @isa => PCDATA
