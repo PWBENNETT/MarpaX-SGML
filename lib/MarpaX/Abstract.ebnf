@@ -18,11 +18,11 @@ ps ~ psAtom+
 ds ~ ps
    | ProcessingInstruction
    | MarkedSectionDeclaration
-PotentiallySystematizedDocument ~ OpeningSystemDeclarations SGMLDocument @isa => TOP
+PotentiallySystematizedDocument ~ OpeningSystemDeclarations SGMLDocument
 OpeningSystemDeclarations ~ ( sStar ) SystemDeclarationList ( s )
                           | Nothing
-SystemDeclarationList ::= SystemDeclaration* separator => s
-SGMLDocument ~ SGMLDocumentEntity SGMLDocumentAtoms @isa => DOCUMENT
+SystemDeclarationList ::= SystemDeclaration* separator => s proper => 0
+SGMLDocument ~ SGMLDocumentEntity SGMLDocumentAtoms
 SGMLDocumentAtoms ~ SGMLDocumentAtom*
 SGMLDocumentAtom ~ SGMLSubDocumentEntity
                  | SGMLTextEntity
@@ -31,38 +31,38 @@ SGMLDocumentAtom ~ SGMLSubDocumentEntity
                  | NonSGMLData
 SGMLDocumentEntity ~ ( sStar ) SGMLDeclaration Prolog DocumentInstanceSet ( Ee )
 SGMLSubDocumentEntity ~ Prolog DocumentInstanceSet ( Ee )
-SGMLTextEntity ~ SGMLCharacter ( Ee ) @isa => TEXT
-CharacterDataEntity ~ SGMLCharacter ( Ee ) @isa => CDATA
-SpecificCharacterDataEntity ~ SGMLCharacter ( Ee ) @isa => CDATA
-NonSGMLData ~ Characters ( Ee ) @isa => CRUFT
-Prolog ~ OptionalOtherPrologList DTD DTDOP LTDOP @isa => PROLOG
+SGMLTextEntity ~ SGMLCharacter ( Ee )
+CharacterDataEntity ~ SGMLCharacter ( Ee )
+SpecificCharacterDataEntity ~ SGMLCharacter ( Ee )
+NonSGMLData ~ Characters ( Ee )
+Prolog ~ OPList DTD DTDOP LTDOP
 DTDOP ~ DTDOPAtom*
 DTDOPAtom ~ DTD
           | OtherProlog
 LTDOP ~ LTDOPAtom*
 LTDOPAtom ~ LTD
           | OtherProlog
-OptionalOtherPrologList ~ OtherProlog*
+OPList ~ OtherProlog*
 OtherProlog ~ CommentDeclaration
             | ProcessingInstruction
             | sAtom
-DocumentInstanceSet ~ BaseDocumentElement OptionalOtherPrologList
+DocumentInstanceSet ~ BaseDocumentElement OPList
 BaseDocumentElement ~ DocumentElement
 DocumentElement ~ Element
-Element ~ StartTag Content EndTag  @isa => ELEMENT
-        | Nothing  Content EndTag  @isa => ELEMENT
-        | StartTag Content Nothing @isa => ELEMENT
-        | Nothing  Content Nothing @isa => ELEMENT
-StartTag ~ ( stago ) TagType AttributeSpecifications ( sStar ) ( tagc ) @isa => TAG @type => start assoc => group
-         | MinimizedStartTag Nothing @isa => TAG @type => start
+Element ~ StartTag Content EndTag
+        | Nothing  Content EndTag
+        | StartTag Content Nothing
+        | Nothing  Content Nothing
+StartTag ~ ( stago ) TagType AttributeSpecifications ( sStar ) ( tagc ) assoc => group
+         | MinimizedStartTag Nothing
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
 EmptyStartTag ~ ( stago ) ( tagc )
 UnclosedStartTag ~ ( stago ) TagType AttributeSpecifications ( sStar )
 NetEnablingStartTag ~ ( stago ) NetTagType AttributeSpecifications ( sStar ) ( neto )
-EndTag ~ ( etago ) TagType ( sStar ) ( tagc ) @isa => TAG @type => end assoc => group
-       | MinimizedEndTag @isa => TAG @type => end
+EndTag ~ ( etago ) TagType ( sStar ) ( tagc ) assoc => group
+       | MinimizedEndTag
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
                 | NullEndTag
@@ -73,12 +73,12 @@ TagType ~ DocumentTypeSpecification GenericIdentifierSpecification
 NetTagType ~ Nothing GenericIdentifierSpecification bless => TagType
 Content ~ MixedContent
         | ElementContent
-        | ReplaceableCharacterData @isa => RCDATA
-        | CharacterData @isa => CDATA
+        | ReplaceableCharacterData
+        | CharacterData
 MixedContent ~ MixedContentAtom*
-MixedContentAtom ~ DataCharacter @isa => PCDATA
-                 | Element @isa => PCDATA
-                 | OtherContent @isa => PCDATA
+MixedContentAtom ~ DataCharacter
+                 | Element
+                 | OtherContent
 ElementContent ~ ElementContentAtom*
 ElementContentAtom ~ Element
                    | OtherContent
@@ -98,13 +98,13 @@ GenericIdentifierSpecification ~ GenericIdentifier
                                | RankStem
 GenericIdentifier ~ Name
 AttributeSpecifications ~ ( sStar ) AttributeSpecificationList
-AttributeSpecificationList ::= AttributeSpecification* separator => sStar
-AttributeSpecification ::= Name ( sStar vi sStar ) AttributeValueSpecification @isa => ATTRIBUTE
-                         | Nothing AttributeValueSpecification @isa => ATTRIBUTE
-AttributeValueSpecification ~ AttributeValue @isa => ATTRVAL
-                            | AttributeValueLiteral @isa => ATTRVAL
-AttributeValueLiteral ~ ( lit )  ReplaceableCharacterData ( lit )  @literal => 1 @quoted => 1 assoc => group
-                      | ( lita ) ReplaceableCharacterData ( lita ) @literal => 1 @quoted => 1 assoc => group
+AttributeSpecificationList ::= AttributeSpecification* separator => sStar proper => 1
+AttributeSpecification ::= Name ( sStar vi sStar ) AttributeValueSpecification
+                         | Nothing AttributeValueSpecification
+AttributeValueSpecification ~ AttributeValue
+                            | AttributeValueLiteral
+AttributeValueLiteral ~ ( lit )  ReplaceableCharacterData ( lit )  assoc => group
+                      | ( lita ) ReplaceableCharacterData ( lita ) assoc => group
 AttributeValue ~ CharacterData
                | GeneralEntityName
                | GeneralEntityNameList
@@ -131,20 +131,20 @@ NumberList ~ Number
            | Number SPACE NumberList
 NumberTokenList ~ NumberToken
                 | NumberToken SPACE NumberTokenList
-ProcessingInstruction ~ ( pio ) SystemDataStar ( pic ) @isa => PI
+ProcessingInstruction ~ ( pio ) SystemDataStar ( pic )
 SystemDataStar ~ SystemData*
 SystemData ~ CharacterData
-ReplaceableCharacterData ~ ReplaceableCharacterDataAtom* @isa => RCDATA
+ReplaceableCharacterData ~ ReplaceableCharacterDataAtom*
 ReplaceableCharacterDataAtom ~ DataCharacter
                              | CharacterReference
                              | GeneralEntityReference
                              | ( Ee )
-CharacterData ~ DataCharacterPlus @isa => CDATA
+CharacterData ~ DataCharacterPlus
 DataCharacterPlus ~ DataCharacter+
 DataCharacter ~ SGMLCharacterAtom
 Characters ~ Character*
 Character ~ SGMLCharacter
-          | NONSGML @isa => CRUFT
+          | NONSGML
 SGMLCharacter ~ SGMLCharacterAtom*
 SGMLCharacterAtom ~ MarkupCharacter
                   | DATACHAR
@@ -168,32 +168,32 @@ FunctionCharacter ~ RE
                   | MSICHAR
                   | MSSCHAR
                   | FUNCHAR
-Name ~ NameStartCharacter NameCharacter @isa => NAME
-Number ~ Digit+ @isa => NUMBER
-NameToken ~ NameCharacter @isa => TOKEN
-NumberToken ~ Digit NameCharacter @isa => TOKEN
-GeneralEntityReference ~   ( ero )  DocumentTypeSpecification Name ( ReferenceEnd ) @isa => REF assoc => group
-ParameterEntityReference ~ ( pero ) DocumentTypeSpecification Name ( ReferenceEnd ) @isa => REF assoc => group
+Name ~ NameStartCharacter NameCharacter
+Number ~ Digit+
+NameToken ~ NameCharacter
+NumberToken ~ Digit NameCharacter
+GeneralEntityReference ~   ( ero )  DocumentTypeSpecification Name ( ReferenceEnd ) assoc => group
+ParameterEntityReference ~ ( pero ) DocumentTypeSpecification Name ( ReferenceEnd ) assoc => group
 ReferenceEnd ~ refc
              | refc RE
-CharacterReference ~ ( cro ) FunctionName    ( ReferenceEnd ) @isa => CREF @numeric => 0 assoc => group
-                   | ( cro ) CharacterNumber ( ReferenceEnd ) @isa => CREF @numeric => 1 assoc => group
+CharacterReference ~ ( cro ) FunctionName    ( ReferenceEnd ) assoc => group
+                   | ( cro ) CharacterNumber ( ReferenceEnd ) assoc => group
 FunctionName ~ 'RE'
              | 'RS'
              | 'SPACE'
              | Name
 CharacterNumber ~ Number
-ParameterLiteral ~ ( lit )  ReplaceableParameterData ( lit )  @literal => 1 @quoted => 1 assoc => group
-                 | ( lita ) ReplaceableParameterData ( lita ) @literal => 1 @quoted => 1 assoc => group
+ParameterLiteral ~ ( lit )  ReplaceableParameterData ( lit )  assoc => group
+                 | ( lita ) ReplaceableParameterData ( lita ) assoc => group
 ReplaceableParameterData ~ ReplaceableParameterDataAtom*
 ReplaceableParameterDataAtom ~ DataCharacter
                              | CharacterReference
                              | ParameterEntityReference
                              | ( Ee )
 NameTokenGroup ~ ( grpo ) ts NameTokens ts ( grpc ) assoc => group
-NameTokens ::= NameToken+ separator => Connection
+NameTokens ::= NameToken+ separator => Connection proper => 1
 NameGroup ~ ( grpo ) ts Names ts ( grpc ) assoc => group
-Names ::= Name+ separator => Connection
+Names ::= Name+ separator => Connection proper => 1
 Connection ~ ts Connector
 AssociatedElementType ~ GenericIdentifier
                       | NameGroup
@@ -202,10 +202,10 @@ ExternalIdentifier ~ 'SYSTEM'
                    | 'SYSTEM' ps SystemIdentifier
                    | 'PUBLIC' ps PublicIdentifier ps SystemIdentifier
 PublicIdentifier ~ MinimumLiteral
-SystemIdentifier ~ ( lit )  SystemDataStar ( lit )  @literal => 1 @quoted => 1 assoc => group
-                 | ( lita ) SystemDataStar ( lita ) @literal => 1 @quoted => 1 assoc => group
-MinimumLiteral ~ ( lit )  MinimumData ( lit )  @literal => 1 @quoted => 1 assoc => group
-               | ( lita ) MinimumData ( lita ) @literal => 1 @quoted => 1 assoc => group
+SystemIdentifier ~ ( lit )  SystemDataStar ( lit )  assoc => group
+                 | ( lita ) SystemDataStar ( lita ) assoc => group
+MinimumLiteral ~ ( lit )  MinimumData ( lit )  assoc => group
+               | ( lita ) MinimumData ( lita ) assoc => group
 MinimumData ~ MinimumDataCharacter+
 MinimumDataCharacter ~ RS
                      | RE
@@ -234,10 +234,10 @@ PublicTextDescription ~ ISOTextDescription
 ISOTextDescription ~ MinimumData
 PublicTextLanguage ~ Name
 PublicTextDesignatingSequence ~ Name
-CommentDeclaration ~ ( mdo ) CommentList ( mdc ) @isa => COMMENT assoc => group
-CommentList ::= Comment* separator => sPlus
+CommentDeclaration ~ ( mdo ) CommentList ( mdc ) assoc => group
+CommentList ::= Comment* separator => sPlus proper => 1
 Comment ~ ( com ) SGMLCharacter ( com ) assoc => group
-MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) @isa => DECL assoc => group
+MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
 MarkedSectionStart ~ mdo dso
 MarkedSectionEnd ~ msc mdc
 MarkedSection ~ SGMLCharacter
@@ -247,7 +247,7 @@ StatusKeyword ~ 'TEMP'
               | 'IGNORE'
               | 'INCLUDE'
               | 'RCDATA'
-EntityDeclaration ~ ( mdo ) 'ENTITY' ps EntityName ps EntityText ps ( mdc ) @isa => DECL assoc => group
+EntityDeclaration ~ ( mdo ) 'ENTITY' ps EntityName ps EntityText ps ( mdc ) assoc => group
 EntityName ~ GeneralEntityName
            | ParameterEntityName
 GeneralEntityName ~ Nothing Name
@@ -297,8 +297,8 @@ ShortReferenceSet ~ EntityDeclaration
                   | ShortReferenceMappingDeclaration
                   | ShortReferenceUseDeclaration
                   | ds
-ElementDeclaration ~ ( mdo ) 'ELEMENT' ps ElementType OptionalOTM ps DeclaredContent ( mdc ) @isa => DECL assoc => group
-                   | ( mdo ) 'ELEMENT' ps ElementType OptionalOTM ps ContentModel    ( mdc ) @isa => DECL assoc => group
+ElementDeclaration ~ ( mdo ) 'ELEMENT' ps ElementType OptionalOTM ps DeclaredContent ( mdc ) assoc => group
+                   | ( mdo ) 'ELEMENT' ps ElementType OptionalOTM ps ContentModel    ( mdc ) assoc => group
 OptionalOTM ~ OTM
             | Nothing
 OTM ~ ps OmittedTagMinimization
@@ -308,7 +308,7 @@ ElementType ~ GenericIdentifier
             | RankedGroup
 RankedElement ~ RankStem ps RankSuffix
 RankedGroup ~ ( grpo ) ts RankStems ts ( grpc ) ps RankSuffix
-RankStems ::= RankStem+ separator => Connection
+RankStems ::= RankStem+ separator => Connection proper => 1
 RankStem ~ Name
 RankSuffix ~ Number
 OmittedTagMinimization ~ StartTagMinimization ps EndTagMinimization
@@ -324,7 +324,7 @@ ContentModel ~ ModelGroup OptionalExceptions
 OptionalExceptions ~ ps Exceptions
                    | Nothing
 ModelGroup ~ ( grpo ) ts ContentTokens ts ( grpc )
-ContentTokens ::= ContentToken+ separator => Connection
+ContentTokens ::= ContentToken+ separator => Connection proper => 1
 ContentToken ~ PrimitiveContentToken
              | ModelGroup
 PrimitiveContentToken ~ rni 'PCDATA'
@@ -345,7 +345,7 @@ DataTagPattern ~ DataTagTemplate OptionalDataTagPaddingTemplate
 OptionalDataTagPaddingTemplate ~ ts seq DataTagPaddingTemplate
                                | Nothing
 DataTagTemplateGroup ~ ( grpo ) ts DataTagTemplateList ts ( grpc ) assoc => group
-DataTagTemplateList ~ DataTagTemplate+ separator => DTTLSep
+DataTagTemplateList ~ DataTagTemplate+ separator => DTTLSep proper => 1
 DTTLSep ~ ts or ts
 DataTagTemplate ~ ParameterLiteral
 DataTagPaddingTemplate ~ ParameterLiteral
@@ -354,8 +354,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ ( mdo ) 'ATTLIST' ps AssociatedElementType  AttributeDefinitions psStar ( mdc ) @isa => DECL assoc => group
-                                   | ( mdo ) 'ATTLIST' ps AssociatedNotationName AttributeDefinitions psStar ( mdc ) @isa => DECL assoc => group
+AttributeDefinitionListDeclaration ~ ( mdo ) 'ATTLIST' ps AssociatedElementType  AttributeDefinitions psStar ( mdc ) assoc => group
+                                   | ( mdo ) 'ATTLIST' ps AssociatedNotationName AttributeDefinitions psStar ( mdc ) assoc => group
 AttributeDefinitions ~ AttributeDefinition+
 AttributeDefinition ~ ps AttributeName ps DeclaredValue ps DefaultValue
 AttributeName ~ Name
@@ -383,16 +383,16 @@ DVMagicMarker ~ 'REQUIRED'
               | 'CURRENT'
               | 'CONREF'
               | 'IMPLIED'
-NotationDeclaration ~ ( mdo ) 'NOTATION' ps NotationName ps NotationIdentifier psStar ( mdc ) @isa => DECL assoc => group
+NotationDeclaration ~ ( mdo ) 'NOTATION' ps NotationName ps NotationIdentifier psStar ( mdc ) assoc => group
 NotationIdentifier ~ ExternalIdentifier
 AssociatedNotationName ~ rni 'NOTATION' ps NotationName
                        | rni 'NOTATION' ps NameGroup
 DataAttributeSpecification ~ ps ( dso ) AttributeSpecificationPlus sStar ( dsc )
-ShortReferenceMappingDeclaration ~ ( mdo ) 'SHORTREF' ps MapName PLNmPlus psStar ( mdc ) @isa => DECL assoc => group
+ShortReferenceMappingDeclaration ~ ( mdo ) 'SHORTREF' ps MapName PLNmPlus psStar ( mdc ) assoc => group
 PLNmPlus ~ PLNm+
 PLNm ~ ps ParameterLiteral ps Name
 MapName ~ Name
-ShortReferenceUseDeclaration ~ ( mdo ) 'USEMAP' ps MapSpecification AETGuts psStar ( mdc ) @isa => DECL assoc => group
+ShortReferenceUseDeclaration ~ ( mdo ) 'USEMAP' ps MapSpecification AETGuts psStar ( mdc ) assoc => group
 AETGuts ~ ps AssociatedElementType
         | Nothing
 MapSpecification ~ MapName
@@ -419,7 +419,7 @@ LinkyThing ~ LinkAttributeSet
            | LinkSetDeclaration
 LinkAttributeSet ~ AttributeDefinitionListDeclaration
                  | EntitySet
-LinkSetDeclaration ~ ( mdo ) 'LINK' ps LinkSetName ps LinkRule psStar ( mdc ) @isa => DECL assoc => group
+LinkSetDeclaration ~ ( mdo ) 'LINK' ps LinkSetName ps LinkRule psStar ( mdc ) assoc => group
 LinkRule ~ SourceElementSpecification
          | ExplicitLinkRule
 LinkSetName ~ Name
@@ -439,7 +439,7 @@ ExplicitLinkRule ~ SourceElementSpecification ps ResultElementSpecification
 ResultElementSpecification ~ GenericIdentifier
                            | GenericIdentifier ResultAttributeSpecification
 ResultAttributeSpecification ~ s ( dso ) AttributeSpecificationPlus ( dsc )
-IDLinkSetDeclaration ~ ( mdo ) 'USELINK' ps LinkSetSpecification ps LinkTypeName psStar ( mdc ) @isa => DECL assoc => group
+IDLinkSetDeclaration ~ ( mdo ) 'USELINK' ps LinkSetSpecification ps LinkTypeName psStar ( mdc ) assoc => group
 LinkSetSpecification ~ LinkSetName
                      | rni 'EMPTY'
                      | rni 'RESTORE'
@@ -451,14 +451,14 @@ SGMLDeclaration ~ ( mdo ) 'SGML' ps MinimumLiteral
                                  ps FeatureUse
                                  ps ApplicationSpecificInformation
                                  psStar
-                  ( mdc ) @isa => DECL assoc => group
+                  ( mdc ) assoc => group
 DocumentCharacterSet ~ 'CHARSET' CharacterSetDescriptions
 CharacterSetDescriptions ~ CharacterSetDescription+
 CharacterSetDescription ~ ps BaseCharacterSet ps DescribedCharacterSetPortion
 BaseCharacterSet ~ 'BASESET' ps PublicIdentifier
 DescribedCharacterSetPortion ~ 'DESCSET' ps CharacterDescriptions
                              | Nothing
-CharacterDescriptions ~ CharacterDescription+ separator => ps
+CharacterDescriptions ~ CharacterDescription+ separator => ps proper => 1
 CharacterDescription ~ DescribedSetCharacterNumber ps NumberOfCharacters ps CharDescChoice
 CharDescChoice ~ BaseSetCharacterNumber
                | MinimumLiteral
@@ -491,7 +491,7 @@ PublicSwitchPlus ~ PublicSwitch+
 PublicSwitch ~ ps CharacterNumber ps CharacterNumber
 ShunnedCharacterNumberIdentification ~ 'SHUNCHAR' ps 'NONE' Nothing
                                      | 'SHUNCHAR' ps 'CONTROLS' ps SCNList
-SCNList ::= CharacterNumber+ separator => ps
+SCNList ::= CharacterNumber+ separator => ps proper => 1
 SyntaxReferenceCharacterSet ~ CharacterSetDescription
 FunctionCharacterIdentification ~ 'FUNCTION' ps 'RE' ps CharacterNumber
                                              ps 'RS' ps CharacterNumber
@@ -499,7 +499,7 @@ FunctionCharacterIdentification ~ 'FUNCTION' ps 'RE' ps CharacterNumber
                                              AddedFunctionCharacters
 AddedFunctionCharacters ::= ps AddedFunctionCharacterList
                           | Nothing
-AddedFunctionCharacterList ::= AddedFunctionCharacter+ separator => ps
+AddedFunctionCharacterList ::= AddedFunctionCharacter+ separator => ps proper => 1
 AddedFunctionCharacter ~ AddedFunction ps FunctionClass ps CharacterNumber
 AddedFunction ~ Name
 FunctionClass ~ 'FUNCHAR'
@@ -513,31 +513,31 @@ NamingRules ~ 'NAMING' ps 'LCNMSTART' ps ParameterLiteral
                        ps 'UCNMCHAR'  ps ParameterLiteral
                        ps 'NAMECASE'  ps 'GENERAL' ps Boolean
                        ps 'ENTITY'    ps Boolean
-Boolean ~ 'YES' @literal => 1 @quoted => 0
-        | 'NO' @literal => 1 @quoted => 0
-CountedBoolean ~ 'YES' ps Number @literal => 1 @quoted => 0
-               | 'NO' @literal => 1 @quoted => 0
-ASN1Boolean ~ 'YES' ps 'ASN1' @literal => 1 @quoted => 0
-            | 'YES' @literal => 1 @quoted => 0
-            | 'NO' @literal => 1 @quoted => 0
+Boolean ~ 'YES'
+        | 'NO'
+CountedBoolean ~ 'YES' ps Number
+               | 'NO'
+ASN1Boolean ~ 'YES' ps 'ASN1'
+            | 'YES'
+            | 'NO'
 DelimiterSet ~ 'DELIM' ps GeneralDelimiters ps ShortReferenceDelimiters
 GeneralDelimiters ~ 'GENERAL' ps 'SGMLREF' ps SGMLDelims
-SGMLDelims ~ SGMLDelim+ separator => ps
+SGMLDelims ~ SGMLDelim+ separator => ps proper => 1
 SGMLDelim ~ Name ps ParameterLiteral
 ShortReferenceDelimiters ~ 'SHORTREF' ps 'SGMLREF' ParameterLiteralList
                          | 'SHORTREF' ps 'NONE' ParameterLiteralList
 ParameterLiteralList ~ ps PLLAtoms
                      | Nothing
-PLLAtoms ::= ParameterLiteral+ separator => ps
+PLLAtoms ::= ParameterLiteral+ separator => ps proper => 1
 ReservedNameUse ~ 'NAMES' ps 'SGMLREF' NamePairs
 NamePairs ~ ps NamePairList
           | Nothing
-NamePairList ::= NamePair+ separator => ps
+NamePairList ::= NamePair+ separator => ps proper => 1
 NamePair ~ Name ps Name
 QuantitySet ~ 'QUANTITY' ps 'SGMLREF' NameQuantities
 NameQuantities ~ ps NameQuantityList
                | Nothing
-NameQuantityList ::= NameQuantity+ separator => ps
+NameQuantityList ::= NameQuantity+ separator => ps proper => 1
 NameQuantity ~ Name ps Number
 FeatureUse ~ 'FEATURES' ps MarkupMinimizationFeatures
                         ps LinkTypeFeatures
@@ -563,7 +563,7 @@ SystemDeclaration ~ ( mdo ) 'SYSTEM' ps MinimumLiteral
                                      ps ValidationServices
                                      ps SDIFSupport
                                      psStar
-                    ( mdc ) @isa => DECL assoc => group
+                    ( mdc ) assoc => group
 ConcreteSyntaxesSupportedPlus ~ ConcreteSyntaxesSupported+
 ConcreteSyntaxesSupported ~ ps ConcreteSyntax
                           | ps ConcreteSyntax ps ConcreteSyntaxChanges
@@ -581,3 +581,5 @@ ValidationServices ~ 'VALIDATE' ps 'GENERAL' ps Boolean
                                 ps 'FORMAL' ps Boolean
 SDIFSupport ~ 'SDIF' ps 'PACK' ps ASN1Boolean
                      ps 'UNPACK' ps ASN1Boolean
+Nothing ~
+Ee ~
