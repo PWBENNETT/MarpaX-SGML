@@ -3,8 +3,6 @@ package MarpaX::SGML::Repository;
 use 5.014;
 use utf8;
 
-use overload ('=' => 'content', fallback => 1);
-
 {
 
     my $singleton = bless {
@@ -16,6 +14,18 @@ use overload ('=' => 'content', fallback => 1);
         shift if (ref($_[0]) || $_[0]) eq __PACKAGE__;
         # no return() here. we're creating an lvalue mutator
         $singleton->{ data }->[ $singleton->{ index } ];
+    }
+
+    sub lhs {
+        shift if (ref($_[0]) || $_[0]) eq __PACKAGE__;
+        # no return() here. we're creating an lvalue mutator
+        $singleton->{ data }->[ 2 * $singleton->{ index } ];
+    }
+
+    sub rhs {
+        shift if (ref($_[0]) || $_[0]) eq __PACKAGE__;
+        # no return() here. we're creating an lvalue mutator
+        $singleton->{ data }->[ 2 * $singleton->{ index } + 1 ];
     }
 
     sub left {
