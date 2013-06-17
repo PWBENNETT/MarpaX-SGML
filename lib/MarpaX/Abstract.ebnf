@@ -1,5 +1,7 @@
 :default ::= action => [values] bless => ::lhs
 :start ::= PotentiallySystematizedDocument
+event ATTR = completed AttributeSpecification
+event ATTRVAL = completed AttributeValueSpecification
 event COMMENT = completed CommentDeclaration
 event CONTENT = completed Content
 event CRUFT = completed NONSGML
@@ -26,6 +28,7 @@ event LTD = completed LTD
 event MATCHED = completed Matched
 event PI = completed ProcessingInstruction
 event PROLOG = completed Prolog
+event REF = completed CharacterReference
 event REF = completed GeneralEntityReference
 event REF = completed ParameterEntityReference
 event SGML = completed SGMLDocument
@@ -274,9 +277,9 @@ PublicTextDescription ::= ISOTextDescription
 ISOTextDescription ::= MinimumData
 PublicTextLanguage ::= Name
 PublicTextDesignatingSequence ::= Name
-CommentDeclaration ::= ( mdo ) CommentList ( mdc ) assoc => group
+CommentDeclaration ~ ( mdo ) CommentList ( mdc )
 CommentList ::= Comment* separator => sPlus proper => 1
-Comment ~ ( com ) SGMLCharacter ( com ) assoc => group
+Comment ::= ( com ) SGMLCharacter ( com ) assoc => group
 MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
 MarkedSectionStart ~ ( mdo ) ( dso )
 MarkedSectionEnd ~ ( msc ) ( mdc )
