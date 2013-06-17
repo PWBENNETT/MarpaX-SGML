@@ -2,12 +2,6 @@ RE ~ [\x{D}]
 RS ~ [\x{A}]
 SPACE ~ [\x{20}]
 SEPCHAR ~ [\x{9}]
-LiteralRE ~ 'RE'
-LiteralRS ~ 'RS'
-LiteralSPACE ~ 'SPACE'
-LiteralSEPCHAR ~ 'SEPHCAR'
-SYSTEM ~ 'SYSTEM'
-PUBLIC ~ 'PUBLIC'
 LCLetter ~ [a-z]
 UCLetter ~ [A-Z]
 Digit ~ [0-9]

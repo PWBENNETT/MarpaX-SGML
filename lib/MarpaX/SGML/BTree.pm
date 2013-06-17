@@ -4,11 +4,6 @@ use 5.014;
 use utf8;
 use Carp qw( confess );
 
-use Exporter qw( import );
-our @EXPORT = qw( btree );
-
-sub btree (\&) { __PACKAGE__->new(@_) }
-
 {
     my $Nothing = [ ];
     sub Nothing () { return $Nothing }

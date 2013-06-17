@@ -1,6 +1,30 @@
 :default ::= action => [values] bless => ::lhs
-lexeme default = action => [start,length,value] bless => ::name
 :start ::= PotentiallySystematizedDocument
+event COMMENT = completed CommentDeclaration
+event CONTENT = completed Content
+event DECL = completed AttributeDefinitionListDeclaration
+event DECL = completed ElementDeclaration
+event DECL = completed EntityDeclaration
+event DECL = completed IDLinkSetDeclaration
+event DECL = completed LinkSetDeclaration
+event DECL = completed NotationDeclaration
+event DECL = completed SGMLDeclaration
+event DECL = completed ShortReferenceUseDeclaration
+event DTD = completed DTD
+event ELEMENT = completed Element
+event LTD = completed LTD
+event MATCHED = completed Matched
+event PI = completed ProcessingInstruction
+event PREF = completed ParameterEntityReference
+event PROLOG = completed Prolog
+event SGML = completed SGMLDocument
+event SYSTEM = completed SystemDeclaration
+event TAG = completed EndTag
+event TAG = completed StartTag
+event TOP = completed PotentiallySystematizedDocument
+event UNCLOSED = completed UnclosedEndTag
+event UNCLOSED = completed UnclosedStartTag
+lexeme default = action => [start,length,value] bless => ::name
 sAtom ::= RE
         | RS
         | SPACE
@@ -8,7 +32,7 @@ sAtom ::= RE
 sStar ::= sAtom*
 s ::= sAtom+
 tsAtom ::= sAtom
-         | ( Ee )
+         | Ee
          | ParameterEntityReference
 ts ::= tsAtom*
 psAtom ::= tsAtom
@@ -18,7 +42,7 @@ ps ::= psAtom+
 ds ::= psAtom
      | ProcessingInstruction
      | MarkedSectionDeclaration
-PotentiallySystematizedDocument ::= OpeningSystemDeclarations SGMLDocument
+PotentiallySystematizedDocument ~ OpeningSystemDeclarations SGMLDocument
 OpeningSystemDeclarations ::= ( sStar ) SystemDeclarationList
                             | Nothing
 SystemDeclarationList ::= SystemDeclaration* separator => s proper => 0
@@ -29,13 +53,13 @@ SGMLDocumentAtom ::= SGMLSubDocumentEntity
                    | CharacterDataEntity
                    | SpecificCharacterDataEntity
                    | NonSGMLData
-SGMLDocumentEntity ::= ( sStar ) SGMLDeclaration Prolog DocumentInstanceSet ( Ee )
-SGMLSubDocumentEntity ::= Prolog DocumentInstanceSet ( Ee )
-SGMLTextEntity ::= SGMLCharacter ( Ee )
-CharacterDataEntity ::= SGMLCharacter ( Ee )
-SpecificCharacterDataEntity ::= SGMLCharacter ( Ee )
-NonSGMLData ::= Characters ( Ee )
-Prolog ::= OPList DTD DTDOP LTDOP
+SGMLDocumentEntity ::= ( sStar ) SGMLDeclaration Prolog DocumentInstanceSet Ee
+SGMLSubDocumentEntity ::= Prolog DocumentInstanceSet Ee
+SGMLTextEntity ::= SGMLCharacter Ee
+CharacterDataEntity ::= SGMLCharacter Ee
+SpecificCharacterDataEntity ::= SGMLCharacter Ee
+NonSGMLData ::= Characters Ee
+Prolog ~ OPList DTD DTDOP LTDOP
 DTDOP ::= DTDOPAtom*
 DTDOPAtom ::= DTD
             | OtherProlog
@@ -49,17 +73,21 @@ OtherProlog ::= CommentDeclaration
 DocumentInstanceSet ::= BaseDocumentElement OPList
 BaseDocumentElement ::= DocumentElement
 DocumentElement ::= Element
-Element ::= StartTag Content EndTag
-          | Nothing  Content EndTag
-          | StartTag Content Nothing
-          | Nothing  Content Nothing
+Element ~ Matched
+        | UnmatchedEnd
+        | UnmatchedStart
+        | BareContent
+Matched ~ StartTag Content EndTag
+UnmatchedEnd ~ Nothing Content EndTag
+UnmatchedStart ~ StartTag Content Nothing
+BareContent ~ Nothing Content Nothing
 StartTag ::= ( stago ) TagType AttributeSpecifications ( sStar ) ( tagc ) assoc => group
            | MinimizedStartTag Nothing
 MinimizedStartTag ::= EmptyStartTag
                     | UnclosedStartTag
                     | NetEnablingStartTag
 EmptyStartTag ::= ( stago ) ( tagc )
-UnclosedStartTag ::= ( stago ) TagType AttributeSpecifications ( sStar )
+UnclosedStartTag ~ ( stago ) TagType AttributeSpecifications ( sStar )
 NetEnablingStartTag ::= ( stago ) NetTagType AttributeSpecifications ( sStar ) ( neto )
 EndTag ::= ( etago ) TagType ( sStar ) ( tagc ) assoc => group
          | MinimizedEndTag
@@ -67,7 +95,7 @@ MinimizedEndTag ::= EmptyEndTag
                   | UnclosedEndTag
                   | NullEndTag
 EmptyEndTag ::= ( etago ) ( tagc )
-UnclosedEndTag ::= ( etago ) TagType ( sStar )
+UnclosedEndTag ~ ( etago ) TagType ( sStar )
 NullEndTag ::= ( netc )
 TagType ::= DocumentTypeSpecification GenericIdentifierSpecification
 NetTagType ::= Nothing GenericIdentifierSpecification bless => TagType
@@ -91,7 +119,7 @@ OtherContent ::= CommentDeclaration
                | CharacterReference
                | GeneralEntityReference
                | MarkedSectionDeclaration
-               | ( Ee )
+               | Ee
 DocumentTypeSpecification ::= NameGroup
                             | Nothing
 GenericIdentifierSpecification ::= GenericIdentifier
@@ -132,14 +160,14 @@ NumberList ::= Number
              | Number SPACE NumberList
 NumberTokenList ::= NumberToken
                   | NumberToken SPACE NumberTokenList
-ProcessingInstruction ::= ( pio ) SystemDataStar ( pic ) pause => after
+ProcessingInstruction ::= ( pio ) SystemDataStar ( pic )
 SystemDataStar ::= SystemData*
 SystemData ::= CharacterData
 ReplaceableCharacterData ::= ReplaceableCharacterDataAtom*
 ReplaceableCharacterDataAtom ::= DataCharacter
                                | CharacterReference
                                | GeneralEntityReference
-                               | ( Ee )
+                               | Ee
 CharacterData ::= DataCharacterPlus
 DataCharacterPlus ::= DataCharacter+
 DataCharacter ::= SGMLCharacterAtom
@@ -185,12 +213,12 @@ FunctionName ::= 'RE'
                | Name
 CharacterNumber ::= Number
 ParameterLiteral ::= ( lit )  ReplaceableParameterData ( lit )  assoc => group
-                 | ( lita ) ReplaceableParameterData ( lita ) assoc => group
+                   | ( lita ) ReplaceableParameterData ( lita ) assoc => group
 ReplaceableParameterData ::= ReplaceableParameterDataAtom*
 ReplaceableParameterDataAtom ::= DataCharacter
                                | CharacterReference
                                | ParameterEntityReference
-                               | ( Ee )
+                               | Ee
 NameTokenGroup ::= ( grpo ) ts NameTokens ts ( grpc ) assoc => group
 NameTokens ::= NameToken+ separator => Connection proper => 1
 NameGroup ::= ( grpo ) ts Names ts ( grpc ) assoc => group
@@ -198,10 +226,10 @@ Names ::= Name+ separator => Connection proper => 1
 Connection ~ ts Connector
 AssociatedElementType ::= GenericIdentifier
                         | NameGroup
-ExternalIdentifier ~ SYSTEM
-                   | PUBLIC ps PublicIdentifier
-                   | SYSTEM ps SystemIdentifier
-                   | PUBLIC ps PublicIdentifier ps SystemIdentifier
+ExternalIdentifier ::= 'SYSTEM'
+                     | 'PUBLIC' ps PublicIdentifier
+                     | 'SYSTEM' ps SystemIdentifier
+                     | 'PUBLIC' ps PublicIdentifier ps SystemIdentifier
 PublicIdentifier ::= MinimumLiteral
 SystemIdentifier ::= ( lit )  SystemDataStar ( lit )  assoc => group
                    | ( lita ) SystemDataStar ( lita ) assoc => group
@@ -237,10 +265,10 @@ PublicTextLanguage ::= Name
 PublicTextDesignatingSequence ::= Name
 CommentDeclaration ::= ( mdo ) CommentList ( mdc ) assoc => group
 CommentList ::= Comment* separator => sPlus proper => 1
-Comment ::= ( com ) SGMLCharacter ( com ) assoc => group
-MarkedSectionDeclaration ::= ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
-MarkedSectionStart ::= ( mdo ) ( dso )
-MarkedSectionEnd ::= ( msc ) ( mdc )
+Comment ~ ( com ) SGMLCharacter ( com ) assoc => group
+MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
+MarkedSectionStart ~ ( mdo ) ( dso )
+MarkedSectionEnd ~ ( msc ) ( mdc )
 MarkedSection ::= SGMLCharacter
 StatusKeywordSpecification ::= ps StatusKeyword psStar
 StatusKeyword ::= 'TEMP'
@@ -248,7 +276,7 @@ StatusKeyword ::= 'TEMP'
                 | 'IGNORE'
                 | 'INCLUDE'
                 | 'RCDATA'
-EntityDeclaration ::= ( mdo 'ENTITY' ) ps EntityName ps EntityText ps ( mdc ) assoc => group pause => after
+EntityDeclaration ::= ( mdo 'ENTITY' ) ps EntityName ps EntityText ps ( mdc ) assoc => group
 EntityName ::= GeneralEntityName
              | ParameterEntityName
 GeneralEntityName ::= Nothing Name
@@ -273,7 +301,7 @@ EntityType ::= 'SUBDOC'
              | 'NDATA' ps NotationName DataAttributeSpecification
              | 'CDATA' ps NotationName DataAttributeSpecification
              | 'SDATA' ps NotationName DataAttributeSpecification
-DTD ::= ( mdo 'DOCTYPE' ) ps DocumentTypeName OptionalEI OptionalWrappedDTDSubset psStar ( mdc ) assoc => group pause => after
+DTD ~ ( mdo 'DOCTYPE' ) ps DocumentTypeName OptionalEI OptionalWrappedDTDSubset psStar ( mdc ) assoc => group
 OptionalEI ::= ps ExternalIdentifier
              | Nothing
 OptionalWrappedDTDSubset ::= WrappedDTDSubset
@@ -298,8 +326,8 @@ ShortReferenceSet ::= EntityDeclaration
                     | ShortReferenceMappingDeclaration
                     | ShortReferenceUseDeclaration
                     | ds
-ElementDeclaration ::= ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps DeclaredContent ( mdc ) assoc => group pause => after
-                     | ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps ContentModel    ( mdc ) assoc => group pause => after
+ElementDeclaration ::= ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps DeclaredContent ( mdc ) assoc => group
+                     | ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps ContentModel    ( mdc ) assoc => group
 OptionalOTM ::= OTM
               | Nothing
 OTM ::= ps OmittedTagMinimization
@@ -355,8 +383,8 @@ Exceptions ::= Exclusions
              | Inclusions
 Inclusions ::= plus NameGroup
 Exclusions ::= minus NameGroup
-AttributeDefinitionListDeclaration ::= ( mdo 'ATTLIST' ) ps AssociatedElementType  AttributeDefinitions psStar ( mdc ) assoc => group pause => after
-                                     | ( mdo 'ATTLIST' ) ps AssociatedNotationName AttributeDefinitions psStar ( mdc ) assoc => group pause => after
+AttributeDefinitionListDeclaration ::= ( mdo 'ATTLIST' ) ps AssociatedElementType  AttributeDefinitions psStar ( mdc ) assoc => group
+                                     | ( mdo 'ATTLIST' ) ps AssociatedNotationName AttributeDefinitions psStar ( mdc ) assoc => group
 AttributeDefinitions ::= AttributeDefinition+
 AttributeDefinition ::= ps AttributeName ps DeclaredValue ps DefaultValue
 AttributeName ::= Name
@@ -401,7 +429,7 @@ AETGuts ::= ps AssociatedElementType
           | Nothing
 MapSpecification ::= MapName
                    | rni 'EMPTY'
-LTD ::= ( mdo 'LINKTYPE' ) ps LinkTypeName ps LinkSpecification ExtIDGuts WrappedLTDSubset psStar ( mdc ) assoc => group pause => after
+LTD ~ ( mdo 'LINKTYPE' ) ps LinkTypeName ps LinkSpecification ExtIDGuts WrappedLTDSubset psStar ( mdc ) assoc => group
 LinkSpecification ::= SimpleLinkSpecification
                     | ImplicitLinkSpecification
                     | ExplicitLinkSpecification
