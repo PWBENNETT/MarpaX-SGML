@@ -1,4 +1,4 @@
-:default ::= action => [values] bless => ::lhs proper => 1
+:default ::= action => [values] bless => ::lhs proper => 1 keep => 1
 :start ::= PotentiallySystematizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
@@ -60,7 +60,7 @@ ds ~ psAtom
 PotentiallySystematizedDocument ~ OpeningSystemDeclarations SGMLDocument
 OpeningSystemDeclarations ~ ( sStar ) SystemDeclarationList
                           | Nothing
-SystemDeclarationList ~ SystemDeclaration* separator => s proper => 0
+SystemDeclarationList ~ SystemDeclaration* separator => s proper => 0 keep => 0
 SGMLDocument ~ SGMLDocumentEntity SGMLDocumentAtoms
 SGMLDocumentAtoms ~ SGMLDocumentAtom*
 SGMLDocumentAtom ~ SGMLSubDocumentEntity
@@ -96,15 +96,15 @@ Matched ~ StartTag Content EndTag
 UnmatchedEnd ~ Content EndTag
 UnmatchedStart ~ StartTag Content
 BareContent ~ Content
-StartTag ~ ( stago ) TagType AttributeSpecifications ( sStar ) ( tagc ) assoc => group
-         | MinimizedStartTag Nothing
+StartTag ~ ( stago ) TagType AttributeSpecifications ( sStar ) ( tagc )
+         | MinimizedStartTag
 MinimizedStartTag ~ EmptyStartTag
                   | UnclosedStartTag
                   | NetEnablingStartTag
 EmptyStartTag ~ ( stago ) ( tagc )
 UnclosedStartTag ~ ( stago ) TagType AttributeSpecifications ( sStar )
 NetEnablingStartTag ~ ( stago ) NetTagType AttributeSpecifications ( sStar ) ( neto )
-EndTag ~ ( etago ) TagType ( sStar ) ( tagc ) assoc => group
+EndTag ~ ( etago ) TagType ( sStar ) ( tagc )
        | MinimizedEndTag
 MinimizedEndTag ~ EmptyEndTag
                 | UnclosedEndTag
@@ -147,8 +147,8 @@ AttributeSpecification ~ Name ( sStar vi sStar ) AttributeValueSpecification
                        | Nothing AttributeValueSpecification
 AttributeValueSpecification ~ AttributeValue
                             | AttributeValueLiteral
-AttributeValueLiteral ~ ( lit )  ReplaceableCharacterData ( lit )  assoc => group
-                      | ( lita ) ReplaceableCharacterData ( lita ) assoc => group
+AttributeValueLiteral ~ ( lit )  ReplaceableCharacterData ( lit )
+                      | ( lita ) ReplaceableCharacterData ( lita )
 AttributeValue ~ CharacterData
                | GeneralEntityName
                | GeneralEntityNameList
@@ -216,27 +216,27 @@ Name ~ NameStartCharacter NameCharacter
 Number ~ Digit+
 NameToken ~ NameCharacter
 NumberToken ~ Digit NameCharacter
-GeneralEntityReference ~   ( ero )  DocumentTypeSpecification Name ( ReferenceEnd ) assoc => group
-ParameterEntityReference ~ ( pero ) DocumentTypeSpecification Name ( ReferenceEnd ) assoc => group
+GeneralEntityReference ~   ( ero )  DocumentTypeSpecification Name ( ReferenceEnd )
+ParameterEntityReference ~ ( pero ) DocumentTypeSpecification Name ( ReferenceEnd )
 ReferenceEnd ~ refc
              | refc RE
-CharacterReference ~ ( cro ) FunctionName    ( ReferenceEnd ) assoc => group
-                   | ( cro ) CharacterNumber ( ReferenceEnd ) assoc => group
+CharacterReference ~ ( cro ) FunctionName    ( ReferenceEnd )
+                   | ( cro ) CharacterNumber ( ReferenceEnd )
 FunctionName ~ 'RE'
              | 'RS'
              | 'SPACE'
              | Name
 CharacterNumber ~ Number
-ParameterLiteral ~ ( lit )  ReplaceableParameterData ( lit )  assoc => group
-                 | ( lita ) ReplaceableParameterData ( lita ) assoc => group
+ParameterLiteral ~ ( lit )  ReplaceableParameterData ( lit )
+                 | ( lita ) ReplaceableParameterData ( lita )
 ReplaceableParameterData ~ ReplaceableParameterDataAtom*
 ReplaceableParameterDataAtom ~ DataCharacter
                              | CharacterReference
                              | ParameterEntityReference
                              | Ee
-NameTokenGroup ~ ( grpo ) ts NameTokens ts ( grpc ) assoc => group
+NameTokenGroup ~ ( grpo ) ts NameTokens ts ( grpc )
 NameTokens ~ NameToken+ separator => Connection
-NameGroup ~ ( grpo ) ts Names ts ( grpc ) assoc => group
+NameGroup ~ ( grpo ) ts Names ts ( grpc )
 Names ~ Name+ separator => Connection
 Connection ~ ts Connector
 AssociatedElementType ~ GenericIdentifier
@@ -246,10 +246,10 @@ ExternalIdentifier ~ 'SYSTEM'
                    | 'SYSTEM' ps SystemIdentifier
                    | 'PUBLIC' ps PublicIdentifier ps SystemIdentifier
 PublicIdentifier ~ MinimumLiteral
-SystemIdentifier ~ ( lit )  SystemDataStar ( lit )  assoc => group
-                 | ( lita ) SystemDataStar ( lita ) assoc => group
-MinimumLiteral ~ ( lit )  MinimumData ( lit )  assoc => group
-               | ( lita ) MinimumData ( lita ) assoc => group
+SystemIdentifier ~ ( lit )  SystemDataStar ( lit )
+                 | ( lita ) SystemDataStar ( lita )
+MinimumLiteral ~ ( lit )  MinimumData ( lit )
+               | ( lita ) MinimumData ( lita )
 MinimumData ~ MinimumDataCharacter+
 MinimumDataCharacter ~ RS
                      | RE
@@ -280,8 +280,8 @@ PublicTextLanguage ~ Name
 PublicTextDesignatingSequence ~ Name
 CommentDeclaration ~ ( mdo ) CommentList ( mdc )
 CommentList ~ Comment* separator => sPlus
-Comment ~ ( com ) SGMLCharacter ( com ) assoc => group
-MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
+Comment ~ ( com ) SGMLCharacter ( com )
+MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd )
 MarkedSectionStart ~ ( mdo ) ( dso )
 MarkedSectionEnd ~ ( msc ) ( mdc )
 MarkedSection ~ SGMLCharacter
@@ -291,7 +291,7 @@ StatusKeyword ~ 'TEMP'
               | 'IGNORE'
               | 'INCLUDE'
               | 'RCDATA'
-EntityDeclaration ~ ( mdo 'ENTITY' ) ps EntityName ps EntityText ps ( mdc ) assoc => group
+EntityDeclaration ~ ( mdo 'ENTITY' ) ps EntityName ps EntityText ps ( mdc )
 EntityName ~ GeneralEntityName
            | ParameterEntityName
 GeneralEntityName ~ Nothing Name
@@ -316,13 +316,13 @@ EntityType ~ 'SUBDOC'
            | 'NDATA' ps NotationName DataAttributeSpecification
            | 'CDATA' ps NotationName DataAttributeSpecification
            | 'SDATA' ps NotationName DataAttributeSpecification
-DTD ~ ( mdo 'DOCTYPE' ) ps DocumentTypeName OptionalEI OptionalWrappedDTDSubset psStar ( mdc ) assoc => group
+DTD ~ ( mdo 'DOCTYPE' ) ps DocumentTypeName OptionalEI OptionalWrappedDTDSubset psStar ( mdc )
 OptionalEI ~ ps ExternalIdentifier
            | Nothing
 OptionalWrappedDTDSubset ~ WrappedDTDSubset
                          | Nothing
 WrappedDTDSubset ~ ps WrappedDTDSubsets
-WrappedDTDSubsets ~ ( dso ) DTDSubsets ( dsc ) assoc => group
+WrappedDTDSubsets ~ ( dso ) DTDSubsets ( dsc )
 DocumentTypeName ~ GenericIdentifier
 DTDSubsets ~ DTDSubset+
 DTDSubset ~ EntitySets
@@ -341,8 +341,8 @@ ShortReferenceSet ~ EntityDeclaration
                   | ShortReferenceMappingDeclaration
                   | ShortReferenceUseDeclaration
                   | ds
-ElementDeclaration ~ ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps DeclaredContent ( mdc ) assoc => group
-                   | ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps ContentModel    ( mdc ) assoc => group
+ElementDeclaration ~ ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps DeclaredContent ( mdc )
+                   | ( mdo 'ELEMENT' ) ps ElementType OptionalOTM ps ContentModel    ( mdc )
 OptionalOTM ~ OTM
             | Nothing
 OTM ~ ps OmittedTagMinimization
@@ -388,9 +388,9 @@ DataTagPattern ~ DataTagTemplate      OptionalDataTagPaddingTemplate
                | DataTagTemplateGroup OptionalDataTagPaddingTemplate
 OptionalDataTagPaddingTemplate ~ ts seq DataTagPaddingTemplate
                                | Nothing
-DataTagTemplateGroup ~ ( grpo ) ts DataTagTemplateList ts ( grpc ) assoc => group
-DataTagTemplateList ~ DataTagTemplate+ separator => DTTLSep
-DTTLSep ~ ts ( or ) ts
+DataTagTemplateGroup ~ ( grpo ) ts DataTagTemplateList ts ( grpc )
+DataTagTemplateList ~ DataTagTemplate+ separator => DataTagTemplateConnection
+DataTagTemplateConnection ~ ts ( or ) ts
 DataTagTemplate ~ ParameterLiteral
 DataTagPaddingTemplate ~ ParameterLiteral
 Exceptions ~ Exclusions
@@ -398,8 +398,8 @@ Exceptions ~ Exclusions
            | Inclusions
 Inclusions ~ plus NameGroup
 Exclusions ~ minus NameGroup
-AttributeDefinitionListDeclaration ~ ( mdo 'ATTLIST' ) ps AssociatedElementType  AttributeDefinitions psStar ( mdc ) assoc => group
-                                   | ( mdo 'ATTLIST' ) ps AssociatedNotationName AttributeDefinitions psStar ( mdc ) assoc => group
+AttributeDefinitionListDeclaration ~ ( mdo 'ATTLIST' ) ps AssociatedElementType  AttributeDefinitions psStar ( mdc )
+                                   | ( mdo 'ATTLIST' ) ps AssociatedNotationName AttributeDefinitions psStar ( mdc )
 AttributeDefinitions ~ AttributeDefinition+
 AttributeDefinition ~ ps AttributeName ps DeclaredValue ps DefaultValue
 AttributeName ~ Name
@@ -430,26 +430,26 @@ DVMagicMarker ~ 'REQUIRED'
 NotationDeclaration ~ ( mdo 'NOTATION' ) ps NotationName
                                          ps NotationIdentifier
                                          psStar
-                      ( mdc ) assoc => group pause => after
+                      ( mdc )
 NotationIdentifier ~ ExternalIdentifier
 AssociatedNotationName ~ rni 'NOTATION' ps NotationName
                        | rni 'NOTATION' ps NameGroup
 DataAttributeSpecification ~ ps ( dso ) AttributeSpecificationPlus sStar ( dsc )
-ShortReferenceMappingDeclaration ~ ( mdo 'SHORTREF' ) ps MapName PLNmPlus psStar ( mdc ) assoc => group pause => after
+ShortReferenceMappingDeclaration ~ ( mdo 'SHORTREF' ) ps MapName PLNmPlus psStar ( mdc )
 PLNmPlus ~ PLNm+
 PLNm ~ ps ParameterLiteral ps Name
 MapName ~ Name
-ShortReferenceUseDeclaration ~ ( mdo 'USEMAP' ) ps MapSpecification AETGuts psStar ( mdc ) assoc => group pause => after
+ShortReferenceUseDeclaration ~ ( mdo 'USEMAP' ) ps MapSpecification AETGuts psStar ( mdc )
 AETGuts ~ ps AssociatedElementType
         | Nothing
 MapSpecification ~ MapName
                  | rni 'EMPTY'
-LTD ~ ( mdo 'LINKTYPE' ) ps LinkTypeName ps LinkSpecification ExtIDGuts WrappedLTDSubset psStar ( mdc ) assoc => group
+LTD ~ ( mdo 'LINKTYPE' ) ps LinkTypeName ps LinkSpecification ExtID WrappedLTDSubset psStar ( mdc )
 LinkSpecification ~ SimpleLinkSpecification
                   | ImplicitLinkSpecification
                   | ExplicitLinkSpecification
-ExtIDGuts ~ ps ExternalIdentifier
-          | Nothing
+ExtID ~ ps ExternalIdentifier
+      | Nothing
 WrappedLTDSubset ~ ps ( dso ) LTDSubset ( dsc )
                  | Nothing
 LinkTypeName ~ Name
@@ -458,24 +458,24 @@ ImplicitLinkSpecification ~ SourceDocumentTypeName ps rni 'IMPLIED'
 ExplicitLinkSpecification ~ SourceDocumentTypeName ps ResultDocumentTypeName
 SourceDocumentTypeName ~ DocumentTypeName
 ResultDocumentTypeName ~ DocumentTypeName
-LTDSubset ~ LinkyThingStar OptionalIDLinkSetDeclaration LinkyThingStar
+LTDSubset ~ OptionalLinkSets OptionalIDLinkSetDeclaration OptionalLinkSets
 OptionalIDLinkSetDeclaration ~ IDLinkSetDeclaration
                              | Nothing
-LinkyThingStar ~ LinkyThing*
-LinkyThing ~ LinkAttributeSet
-           | LinkSetDeclaration
+OptionalLinkSets ~ LinkSet*
+LinkSet ~ LinkAttributeSet
+        | LinkSetDeclaration
 LinkAttributeSet ~ AttributeDefinitionListDeclaration
                  | EntitySet
 LinkSetDeclaration ~ ( mdo 'LINK' ) ps LinkSetName
-                                      ps LinkRule
-                                      psStar
-                       ( mdc ) assoc => group pause => after
+                                    ps LinkRule
+                                    psStar
+                     ( mdc )
 LinkRule ~ SourceElementSpecification
          | ExplicitLinkRule
 LinkSetName ~ Name
             | rni 'INITIAL'
 SourceElementSpecification ~ AssociatedElementType Uselink Postlink LinkAttributeSpecification
-UseLink ~ ps rni 'USELINK' ps LSN
+Uselink ~ ps rni 'USELINK' ps LSN
         | Nothing
 LSN ~ LinkSetName
     | rni 'EMPTY'
@@ -492,7 +492,7 @@ ResultAttributeSpecification ~ s ( dso ) AttributeSpecificationPlus ( dsc )
 IDLinkSetDeclaration ~ ( mdo 'USELINK' ) ps LinkSetSpecification
                                          ps LinkTypeName
                                          psStar
-                       ( mdc ) assoc => group pause => after
+                       ( mdc )
 LinkSetSpecification ~ LinkSetName
                      | rni 'EMPTY'
                      | rni 'RESTORE'
@@ -504,7 +504,7 @@ SGMLDeclaration ~ ( mdo 'SGML' ) ps MinimumLiteral
                                  ps FeatureUse
                                  ps ApplicationSpecificInformation
                                  psStar
-                  ( mdc ) assoc => group pause => after
+                  ( mdc )
 DocumentCharacterSet ~ 'CHARSET' CharacterSetDescriptions
 CharacterSetDescriptions ~ CharacterSetDescription+
 CharacterSetDescription ~ ps BaseCharacterSet ps DescribedCharacterSetPortion
@@ -616,7 +616,7 @@ SystemDeclaration ~ ( mdo 'SYSTEM') ps MinimumLiteral
                                     ps ValidationServices
                                     ps SDIFSupport
                                     psStar
-                    ( mdc ) assoc => group pause => after
+                    ( mdc )
 ConcreteSyntaxesSupportedPlus ~ ConcreteSyntaxesSupported+
 ConcreteSyntaxesSupported ~ ps ConcreteSyntax
                           | ps ConcreteSyntax ps ConcreteSyntaxChanges
