@@ -706,8 +706,11 @@ LCNMSTRT ~
 UCNMSTRT ~
 LCNMCHAR ~ '-'
          | '.'
-         | LCLetter
-UCNMCHAR ~ UCLetter
+UCNMCHAR ~
+MSOCHAR ~
+MSICHAR ~
+MSSCHAR ~
+FUNCHAR ~
 Special ~ '('
         | ')'
         | '+'
@@ -726,3 +729,4 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
+NONSGML ~
