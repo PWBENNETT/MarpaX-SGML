@@ -40,10 +40,10 @@ event UNCLOSED = completed UnclosedStartTag
 event UNMATCHED = completed UnmatchedEnd
 event UNMATCHED = completed UnmatchedStart
 lexeme default = action => [start,length,value] bless => ::name
-sAtom ~ RE
-      | RS
-      | SPACE
-      | SEPCHAR
+sAtom ~ ( RE )
+      | ( RS )
+      | ( SPACE )
+      | ( SEPCHAR )
 sStar ~ sAtom*
 s ~ sAtom+
 tsAtom ~ sAtom
@@ -587,10 +587,8 @@ NamePairs ~ ps NamePairList
           | Nothing
 NamePairList ~ NamePair+ separator => ps
 NamePair ~ Name ps Name
-QuantitySet ~ 'QUANTITY' ps 'SGMLREF' NameQuantities
-NameQuantities ~ ps NameQuantityList
-               | Nothing
-NameQuantityList ~ NameQuantity+ separator => ps
+QuantitySet ~ 'QUANTITY' ps 'SGMLREF' ps NameQuantities
+NameQuantities ~ NameQuantity+ separator => ps
 NameQuantity ~ Name ps Number
 FeatureUse ~ 'FEATURES' ps MarkupMinimizationFeatures
                         ps LinkTypeFeatures
@@ -607,35 +605,35 @@ OtherFeatures ~ 'OTHER' ps 'CONCUR' ps CountedBoolean
                         ps 'FORMAL' ps Boolean
 ApplicationSpecificInformation ~ 'APPINFO' ps 'NONE'
                                | 'APPINFO' ps MinimumLiteral
-SystemDeclaration ~ ( mdo 'SYSTEM') ps MinimumLiteral
-                                    ps DocumentCharacterSet
-                                    ps CapacitySet
-                                    ps FeatureUse
-                                    ps ConcreteSyntaxScope
-                                    ps ConcreteSyntaxesSupportedPlus
-                                    ps ValidationServices
-                                    ps SDIFSupport
-                                    psStar
+SystemDeclaration ~ ( mdo 'SYSTEM' ) ps MinimumLiteral
+                                     ps DocumentCharacterSet
+                                     ps CapacitySet
+                                     ps FeatureUse
+                                     ps ConcreteSyntaxScope
+                                     ps ConcreteSyntaxesSupportedPlus
+                                     ps ValidationServices
+                                     ps SDIFSupport
+                                     psStar
                     ( mdc )
 ConcreteSyntaxesSupportedPlus ~ ConcreteSyntaxesSupported+
 ConcreteSyntaxesSupported ~ ps ConcreteSyntax
                           | ps ConcreteSyntax ps ConcreteSyntaxChanges
-ConcreteSyntaxChanges ~ 'CHANGES' ps 'SWITCHES'
-                      | 'CHANGES' ps 'DELIMLEN' ps Number
-                                  ps 'SEQUENCE' ps Boolean
-                                  ps 'SRCNT' ps Number
-                                  ps 'SRLEN' ps Number
-ValidationServices ~ 'VALIDATE' ps 'GENERAL' ps Boolean
-                                ps 'MODEL' ps Boolean
-                                ps 'EXCLUDE' ps Boolean
-                                ps 'CAPACITY' ps Boolean
-                                ps 'NONSGML' ps Boolean
-                                ps 'SGML' ps Boolean
-                                ps 'FORMAL' ps Boolean
-SDIFSupport ~ 'SDIF' ps 'PACK' ps ASN1Boolean
-                     ps 'UNPACK' ps ASN1Boolean
+ConcreteSyntaxChanges ~ ( 'CHANGES' ) ps 'SWITCHES'
+                      | ( 'CHANGES' ) ps 'DELIMLEN' ps Number
+                                      ps 'SEQUENCE' ps Boolean
+                                      ps 'SRCNT' ps Number
+                                      ps 'SRLEN' ps Number
+ValidationServices ~ ( 'VALIDATE' ) ps 'GENERAL' ps Boolean
+                                    ps 'MODEL' ps Boolean
+                                    ps 'EXCLUDE' ps Boolean
+                                    ps 'CAPACITY' ps Boolean
+                                    ps 'NONSGML' ps Boolean
+                                    ps 'SGML' ps Boolean
+                                    ps 'FORMAL' ps Boolean
+SDIFSupport ~ ( 'SDIF' ) ps 'PACK' ps ASN1Boolean
+                         ps 'UNPACK' ps ASN1Boolean
 Nothing ~
-Ee ~
+:lexeme Ee ~ pause => before
 RE ~ [\x{D}]
 RS ~ [\x{A}]
 SPACE ~ [\x{20}]
