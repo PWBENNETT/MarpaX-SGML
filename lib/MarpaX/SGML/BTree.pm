@@ -14,175 +14,196 @@ sub btree (\&) { __PACKAGE__->new(@_) }
     sub Nothing () { return $Nothing }
 }
 
-sub new {
-    my $class = shift;
-    my $comparison = shift or confess "No comparison CODE ref specified";
-    ref($comparison) eq 'CODE' or confess "Specified comparison was not a CODE ref";
-    return bless {
-        index => 1,
-        data => [ undef, Nothing ],
-        cmp => $comparison,
-    } => $class;
-}
+{
 
-sub clone {
-    my $old = shift;
-    ref($old) or confess "I don't understand";
-    return bless {
-        %$old,
-    } => ref($old);
-}
+    my %data;
 
-sub content {
-    my $self = shift;
-    # no return() here. It's an lvalue accessor
-    $self->{ data }->[ $self->{ index } ];
-}
+    sub new {
+        my $class = shift;
+        my $comparison = shift or confess "No comparison CODE ref specified";
+        ref($comparison) eq 'CODE' or confess "Specified comparison was not a CODE ref";
+        my $self = bless {
+            index => 1,
+            cmp => $comparison,
+        } => $class;
+        $data{ "$self" } = [ undef, Nothing ];
+        return $self;
+    }
 
-sub left {
-    my $self = shift->clone();
-    $self->{ index } *= 2;
-    return $self;
-}
+    sub follow {
+        my $old = shift;
+        my $class = ref($old) or confess "I don't understand";
+        my $self = bless {
+            %$old,
+        } => $class;
+        $data{ "$self" } = $data{ "$old" };
+        return $self;
+    }
 
-sub right {
-    my $self = shift->clone();
-    $self->{ index } *= 2;
-    $self->{ index } += 1;
-    return $self;
-}
+    sub content {
+        my $self = shift;
+        # no return() here. It's an lvalue accessor
+        $data{ "$self" }->[ $self->{ index } ];
+    }
 
-sub up {
-    my $self = shift->clone();
-    $self->{ index } = int($self->{ index } / 2) if $self->{ index } > 1;
-    return $self;
-}
+    sub lhs {
+        my $self = shift;
+        # no return() here. It's an lvalue accessor
+        $data{ "$self" }->[ 2 * $self->{ index } ];
+    }
 
-sub root {
-    my $self = shift->clone();
-    $self->{ index } = 1;
-    return $self;
-}
+    sub rhs {
+        my $self = shift;
+        # no return() here. It's an lvalue accessor
+        $data{ "$self" }->[ 2 * $self->{ index } + 1 ];
+    }
 
-sub select {
-    my $self = shift;
-    my ($key) = @_;
-    my $direction = ($self->content ne Nothing) ? do {
-        local *a = $self->content;
-        local *b = $key;
-        $self->{ cmp }->();
-    } : Nothing;
-    my $rv;
-    given ($direction) {
-        when (-1) {
-            $rv = $self->left->select($key);
-        };
-        when (0) {
-            $rv = $self->content;
-        };
-        when (1) {
-            $rv = $self->right->select($key);
-        };
-    };
-    return $rv;
-}
+    sub left {
+        my $self = shift->follow();
+        $self->{ index } *= 2;
+        return $self;
+    }
 
-sub insert {
-    my $self = shift;
-    my ($key) = @_;
-    my $direction = ($self->content ne Nothing) ? do {
-        local *a = $self->content;
-        local *b = $key;
-        $self->{ cmp }->();
-    } : Nothing;
-    given ($direction) {
-        when (Nothing) {
-            $self->content = $key;
-        };
-        when (-1) {
-            return $self->left->insert($key);
-        };
-        when (1) {
-            return $self->right->insert($key);
-        };
-    };
-    return $self;
-}
+    sub right {
+        my $self = shift->follow();
+        $self->{ index } *= 2;
+        $self->{ index } += 1;
+        return $self;
+    }
 
-sub update {
-    my $self = shift;
-    my ($key) = @_;
-    my $direction = ($self->content ne Nothing) ? do {
-        local *a = $self->content;
-        local *b = $key;
-        $self->{ cmp }->();
-    } : Nothing;
-    given ($direction) {
-        when (-1) {
-            return $self->left->update($key);
-        };
-        when (0) {
-            $self->content = $key;
-        };
-        when (1) {
-            return $self->right->update($key);
-        };
-    };
-    return $self;
-}
+    sub up {
+        my $self = shift->follow();
+        $self->{ index } = int($self->{ index } / 2) if $self->{ index } > 1;
+        return $self;
+    }
 
-sub upsert {
-    my $self = shift;
-    my ($key) = @_;
-    my $direction = ($self->content ne Nothing) ? do {
-        local *a = $self->content;
-        local *b = $key;
-        $self->{ cmp }->();
-    } : 0;
-    given ($direction) {
-        when (-1) {
-            return $self->left->upsert($key);
-        };
-        when (0) {
-            $self->content = $key;
-        };
-        when (1) {
-            return $self->right->upsert($key);
-        };
-    };
-    return $self;
-}
+    sub root {
+        my $self = shift->follow();
+        $self->{ index } = 1;
+        return $self;
+    }
 
-sub delete {
-    my $self = shift;
-    my ($key) = @_;
-    my $direction = ($self->content ne Nothing) ? do {
-        local *a = $self->content;
-        local *b = $key;
-        $self->{ cmp }->();
-    } : Nothing;
-    my $rv;
-    given ($direction) {
-        when (-1) {
-            return $self->left->delete($key);
+    sub select {
+        my $self = shift;
+        my ($item) = @_;
+        my $direction = ($self->content ne Nothing) ? do {
+            local *a = $self->content;
+            local *b = $item;
+            $self->{ cmp }->();
+        } : Nothing;
+        my $rv;
+        given ($direction) {
+            when (-1) {
+                $rv = $self->left->select($item);
+            };
+            when (0) {
+                $rv = $self->content;
+            };
+            when (1) {
+                $rv = $self->right->select($item);
+            };
         };
-        when (0) {
-            $rv = $self->content;
-            $self->content = Nothing;
-        };
-        when (1) {
-            return $self->right->delete($key);
-        };
-    };
-    return $rv;
-}
+        return $rv;
+    }
 
-sub walk {
-    my $self = shift;
-    my ($coderef) = @_;
-    $coderef ||= sub { return $_[0] };
-    return if $self->content eq Nothing;
-    return ($self->left->walk($coderef), $coderef->($self->content), $self->right->walk($coderef));
+    sub insert {
+        my $self = shift;
+        my ($item) = @_;
+        my $direction = ($self->content ne Nothing) ? do {
+            local *a = $self->content;
+            local *b = $item;
+            $self->{ cmp }->();
+        } : Nothing;
+        given ($direction) {
+            when (Nothing) {
+                $self->content = $item;
+            };
+            when (-1) {
+                return $self->left->insert($item);
+            };
+            when (1) {
+                return $self->right->insert($item);
+            };
+        };
+        return $self;
+    }
+
+    sub update {
+        my $self = shift;
+        my ($item) = @_;
+        my $direction = ($self->content ne Nothing) ? do {
+            local *a = $self->content;
+            local *b = $item;
+            $self->{ cmp }->();
+        } : Nothing;
+        given ($direction) {
+            when (-1) {
+                return $self->left->update($item);
+            };
+            when (0) {
+                $self->content = $item;
+            };
+            when (1) {
+                return $self->right->update($item);
+            };
+        };
+        return $self;
+    }
+
+    sub upsert {
+        my $self = shift;
+        my ($item) = @_;
+        my $direction = ($self->content ne Nothing) ? do {
+            local *a = $self->content;
+            local *b = $item;
+            $self->{ cmp }->();
+        } : 0;
+        given ($direction) {
+            when (-1) {
+                return $self->left->upsert($item);
+            };
+            when (0) {
+                $self->content = $item;
+            };
+            when (1) {
+                return $self->right->upsert($item);
+            };
+        };
+        return $self;
+    }
+
+    sub delete {
+        my $self = shift;
+        my ($item) = @_;
+        my $direction = ($self->content ne Nothing) ? do {
+            local *a = $self->content;
+            local *b = $item;
+            $self->{ cmp }->();
+        } : Nothing;
+        my $rv;
+        given ($direction) {
+            when (-1) {
+                return $self->left->delete($item);
+            };
+            when (0) {
+                $rv = $self->content;
+                $self->content = Nothing;
+            };
+            when (1) {
+                return $self->right->delete($item);
+            };
+        };
+        return $rv;
+    }
+
+    sub walk {
+        my $self = shift;
+        my ($coderef) = @_;
+        $coderef ||= sub { return $_[0] };
+        return if $self->content eq Nothing;
+        return ($self->left->walk($coderef), $coderef->($self->content), $self->right->walk($coderef));
+    }
+
 }
 
 1;
