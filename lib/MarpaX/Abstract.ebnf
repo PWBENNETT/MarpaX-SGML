@@ -1,4 +1,4 @@
-:default ::= action => [values] bless => ::lhs
+:default ::= action => [values] bless => ::lhs proper => 1
 :start ::= PotentiallySystematizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
@@ -140,29 +140,29 @@ GenericIdentifierSpecification ::= GenericIdentifier
                                  | RankStem
 GenericIdentifier ::= Name
 AttributeSpecifications ::= ( sStar ) AttributeSpecificationList
-AttributeSpecificationList ::= AttributeSpecification* separator => sStar proper => 1
-AttributeSpecificationPlus ::= AttributeSpecification* separator => sStar proper => 1
-AttributeSpecification ::= Name ( sStar vi sStar ) AttributeValueSpecification
-                         | Nothing AttributeValueSpecification
-AttributeValueSpecification ::= AttributeValue
-                              | AttributeValueLiteral
-AttributeValueLiteral ::= ( lit )  ReplaceableCharacterData ( lit )  assoc => group
-                        | ( lita ) ReplaceableCharacterData ( lita ) assoc => group
-AttributeValue ::= CharacterData
-                 | GeneralEntityName
-                 | GeneralEntityNameList
-                 | IDValue
-                 | IDReferenceValue
-                 | IDReferenceList
-                 | Name
-                 | NameList
-                 | NameToken
-                 | NameTokenList
-                 | NotationName
-                 | Number
-                 | NumberList
-                 | NumberToken
-                 | NumberTokenList
+AttributeSpecificationList ::= AttributeSpecification* separator => sStar
+AttributeSpecificationPlus ::= AttributeSpecification+ separator => sStar
+AttributeSpecification ~ Name ( sStar vi sStar ) AttributeValueSpecification
+                       | Nothing AttributeValueSpecification
+AttributeValueSpecification ~ AttributeValue
+                            | AttributeValueLiteral
+AttributeValueLiteral ~ ( lit )  ReplaceableCharacterData ( lit )  assoc => group
+                      | ( lita ) ReplaceableCharacterData ( lita ) assoc => group
+AttributeValue ~ CharacterData
+               | GeneralEntityName
+               | GeneralEntityNameList
+               | IDValue
+               | IDReferenceValue
+               | IDReferenceList
+               | Name
+               | NameList
+               | NameToken
+               | NameTokenList
+               | NotationName
+               | Number
+               | NumberList
+               | NumberToken
+               | NumberTokenList
 GeneralEntityNameList ::= NameList
 IDValue ::= Name
 IDReferenceList ::= NameList
@@ -234,9 +234,9 @@ ReplaceableParameterDataAtom ::= DataCharacter
                                | ParameterEntityReference
                                | Ee
 NameTokenGroup ::= ( grpo ) ts NameTokens ts ( grpc ) assoc => group
-NameTokens ::= NameToken+ separator => Connection proper => 1
+NameTokens ::= NameToken+ separator => Connection
 NameGroup ::= ( grpo ) ts Names ts ( grpc ) assoc => group
-Names ::= Name+ separator => Connection proper => 1
+Names ::= Name+ separator => Connection
 Connection ~ ts Connector
 AssociatedElementType ::= GenericIdentifier
                         | NameGroup
@@ -278,7 +278,7 @@ ISOTextDescription ::= MinimumData
 PublicTextLanguage ::= Name
 PublicTextDesignatingSequence ::= Name
 CommentDeclaration ~ ( mdo ) CommentList ( mdc )
-CommentList ::= Comment* separator => sPlus proper => 1
+CommentList ::= Comment* separator => sPlus
 Comment ::= ( com ) SGMLCharacter ( com ) assoc => group
 MarkedSectionDeclaration ~ ( MarkedSectionStart ) StatusKeywordSpecification ( dso ) MarkedSection ( MarkedSectionEnd ) assoc => group
 MarkedSectionStart ~ ( mdo ) ( dso )
@@ -351,7 +351,7 @@ ElementType ::= GenericIdentifier
               | RankedGroup
 RankedElement ::= RankStem ps RankSuffix
 RankedGroup ::= ( grpo ) ts RankStems ts ( grpc ) ps RankSuffix
-RankStems ::= RankStem+ separator => Connection proper => 1
+RankStems ::= RankStem+ separator => Connection
 RankStem ::= Name
 RankSuffix ::= Number
 OmittedTagMinimization ::= StartTagMinimization ps EndTagMinimization
@@ -367,7 +367,7 @@ ContentModel ::= ModelGroup OptionalExceptions
 OptionalExceptions ::= ps Exceptions
                      | Nothing
 ModelGroup ::= ( grpo ) ts ContentTokens ts ( grpc )
-ContentTokens ::= ContentToken+ separator => Connection proper => 1
+ContentTokens ::= ContentToken+ separator => Connection
 ContentToken ::= PrimitiveContentToken
                | ModelGroup
 PrimitiveContentToken ::= rni 'PCDATA'
@@ -388,7 +388,7 @@ DataTagPattern ::= DataTagTemplate      OptionalDataTagPaddingTemplate
 OptionalDataTagPaddingTemplate ::= ts seq DataTagPaddingTemplate
                                  | Nothing
 DataTagTemplateGroup ::= ( grpo ) ts DataTagTemplateList ts ( grpc ) assoc => group
-DataTagTemplateList ::= DataTagTemplate+ separator => DTTLSep proper => 1
+DataTagTemplateList ::= DataTagTemplate+ separator => DTTLSep
 DTTLSep ::= ts ( or ) ts
 DataTagTemplate ::= ParameterLiteral
 DataTagPaddingTemplate ::= ParameterLiteral
@@ -510,7 +510,7 @@ CharacterSetDescription ::= ps BaseCharacterSet ps DescribedCharacterSetPortion
 BaseCharacterSet ::= 'BASESET' ps PublicIdentifier
 DescribedCharacterSetPortion ::= 'DESCSET' ps CharacterDescriptions
                                | Nothing
-CharacterDescriptions ::= CharacterDescription+ separator => ps proper => 1
+CharacterDescriptions ::= CharacterDescription+ separator => ps
 CharacterDescription ::= DescribedSetCharacterNumber ps NumberOfCharacters ps CharDescChoice
 CharDescChoice ::= BaseSetCharacterNumber
                | MinimumLiteral
@@ -543,7 +543,7 @@ PublicSwitchPlus ::= PublicSwitch+
 PublicSwitch ::= ps CharacterNumber ps CharacterNumber
 ShunnedCharacterNumberIdentification ::= 'SHUNCHAR' ps 'NONE'
                                        | 'SHUNCHAR' ps 'CONTROLS' ps SCNList
-SCNList ::= CharacterNumber+ separator => ps proper => 1
+SCNList ::= CharacterNumber+ separator => ps
 SyntaxReferenceCharacterSet ::= CharacterSetDescription
 FunctionCharacterIdentification ::= 'FUNCTION' ps 'RE' ps CharacterNumber
                                                ps 'RS' ps CharacterNumber
@@ -551,7 +551,7 @@ FunctionCharacterIdentification ::= 'FUNCTION' ps 'RE' ps CharacterNumber
                                                AddedFunctionCharacters
 AddedFunctionCharacters ::= ps AddedFunctionCharacterList
                             | Nothing
-AddedFunctionCharacterList ::= AddedFunctionCharacter+ separator => ps proper => 1
+AddedFunctionCharacterList ::= AddedFunctionCharacter+ separator => ps
 AddedFunctionCharacter ::= AddedFunction ps FunctionClass ps CharacterNumber
 AddedFunction ::= Name
 FunctionClass ::= 'FUNCHAR'
@@ -574,22 +574,22 @@ ASN1Boolean ::= 'YES' ps 'ASN1'
             | 'NO'
 DelimiterSet ::= 'DELIM' ps GeneralDelimiters ps ShortReferenceDelimiters
 GeneralDelimiters ::= 'GENERAL' ps 'SGMLREF' ps SGMLDelims
-SGMLDelims ::= SGMLDelim+ separator => ps proper => 1
+SGMLDelims ::= SGMLDelim+ separator => ps
 SGMLDelim ::= Name ps ParameterLiteral
 ShortReferenceDelimiters ::= 'SHORTREF' ps 'SGMLREF' ParameterLiterals
                            | 'SHORTREF' ps 'NONE' ParameterLiterals
 ParameterLiterals ::= ps ParameterLiteralList
                     | Nothing
-ParameterLiteralList ::= ParameterLiteral+ separator => ps proper => 1
+ParameterLiteralList ::= ParameterLiteral+ separator => ps
 ReservedNameUse ::= 'NAMES' ps 'SGMLREF' NamePairs
 NamePairs ::= ps NamePairList
             | Nothing
-NamePairList ::= NamePair+ separator => ps proper => 1
+NamePairList ::= NamePair+ separator => ps
 NamePair ::= Name ps Name
 QuantitySet ::= 'QUANTITY' ps 'SGMLREF' NameQuantities
 NameQuantities ::= ps NameQuantityList
                  | Nothing
-NameQuantityList ::= NameQuantity+ separator => ps proper => 1
+NameQuantityList ::= NameQuantity+ separator => ps
 NameQuantity ::= Name ps Number
 FeatureUse ::= 'FEATURES' ps MarkupMinimizationFeatures
                           ps LinkTypeFeatures
