@@ -53,20 +53,20 @@ use Carp qw( confess );
         $data{ "$self" }->[ 2 * $self->{ index } + 1 ];
     }
 
-    sub left {
+    sub left_child {
         my $self = shift->follow();
         $self->{ index } *= 2;
         return $self;
     }
 
-    sub right {
+    sub right_child {
         my $self = shift->follow();
         $self->{ index } *= 2;
         $self->{ index } += 1;
         return $self;
     }
 
-    sub up {
+    sub parent {
         my $self = shift->follow();
         $self->{ index } = int($self->{ index } / 2) if $self->{ index } > 1;
         return $self;
@@ -89,13 +89,13 @@ use Carp qw( confess );
         my $rv;
         given ($direction) {
             when (-1) {
-                $rv = $self->left->select($item);
+                $rv = $self->left_child->select($item);
             };
             when (0) {
                 $rv = $self->content;
             };
             when (1) {
-                $rv = $self->right->select($item);
+                $rv = $self->right_child->select($item);
             };
         };
         return $rv;
@@ -114,10 +114,10 @@ use Carp qw( confess );
                 $self->content = $item;
             };
             when (-1) {
-                return $self->left->insert($item);
+                return $self->left_child->insert($item);
             };
             when (1) {
-                return $self->right->insert($item);
+                return $self->right_child->insert($item);
             };
         };
         return $self;
@@ -133,13 +133,13 @@ use Carp qw( confess );
         } : Nothing;
         given ($direction) {
             when (-1) {
-                return $self->left->update($item);
+                return $self->left_child->update($item);
             };
             when (0) {
                 $self->content = $item;
             };
             when (1) {
-                return $self->right->update($item);
+                return $self->right_child->update($item);
             };
         };
         return $self;
@@ -155,13 +155,13 @@ use Carp qw( confess );
         } : 0;
         given ($direction) {
             when (-1) {
-                return $self->left->upsert($item);
+                return $self->left_child->upsert($item);
             };
             when (0) {
                 $self->content = $item;
             };
             when (1) {
-                return $self->right->upsert($item);
+                return $self->right_child->upsert($item);
             };
         };
         return $self;
@@ -178,14 +178,14 @@ use Carp qw( confess );
         my $rv;
         given ($direction) {
             when (-1) {
-                return $self->left->delete($item);
+                return $self->left_child->delete($item);
             };
             when (0) {
                 $rv = $self->content;
                 $self->content = Nothing;
             };
             when (1) {
-                return $self->right->delete($item);
+                return $self->right_child->delete($item);
             };
         };
         return $rv;
@@ -196,7 +196,7 @@ use Carp qw( confess );
         my ($coderef) = @_;
         $coderef ||= sub { return $_[0] };
         return if $self->content eq Nothing;
-        return ($self->left->walk($coderef), $coderef->($self->content), $self->right->walk($coderef));
+        return ($self->left_child->walk($coderef), $coderef->($self->content), $self->right_child->walk($coderef));
     }
 
 }
