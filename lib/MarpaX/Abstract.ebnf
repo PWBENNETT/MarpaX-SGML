@@ -25,7 +25,6 @@ event ENTITY = completed SGMLSubDocumentEntity
 event ENTITY = completed SGMLTextEntity
 event ENTITY = completed SpecificCharacterDataEntity
 event LTD = completed LTD
-event MATCHED = completed Matched
 event PI = completed ProcessingInstruction
 event PROLOG = completed Prolog
 event REF = completed CharacterReference
@@ -38,6 +37,8 @@ event TAG = completed StartTag
 event TOP = completed PotentiallySystematizedDocument
 event UNCLOSED = completed UnclosedEndTag
 event UNCLOSED = completed UnclosedStartTag
+event UNMATCHED = completed UnmatchedEnd
+event UNMATCHED = completed UnmatchedStart
 lexeme default = action => [start,length,value] bless => ::name
 sAtom ::= RE
         | RS
