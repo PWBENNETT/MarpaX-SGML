@@ -195,8 +195,8 @@ SGMLCharacterAtom ~ MarkupCharacter
 MarkupCharacter ~ NameCharacter
                 | FunctionCharacter
                 | DELMCHAR
-NameCharacter ~ NameCharacter NameCharacter
-              | NameStartCharacter
+NameCharacters ~ NameCharacter*
+NameCharacter ~ NameStartCharacter
               | Digit
               | LCNMCHAR
               | UCNMCHAR
@@ -212,7 +212,7 @@ FunctionCharacter ~ RE
                   | MSICHAR
                   | MSSCHAR
                   | FUNCHAR
-Name ~ NameStartCharacter NameCharacter
+Name ~ NameStartCharacter NameCharacters
 Number ~ Digit+
 NameToken ~ NameCharacter
 NumberToken ~ Digit NameCharacter
@@ -636,3 +636,93 @@ SDIFSupport ~ 'SDIF' ps 'PACK' ps ASN1Boolean
                      ps 'UNPACK' ps ASN1Boolean
 Nothing ~
 Ee ~
+RE ~ [\x{D}]
+RS ~ [\x{A}]
+SPACE ~ [\x{20}]
+SEPCHAR ~ [\x{9}]
+LCLetter ~ [a-z]
+UCLetter ~ [A-Z]
+Digit ~ [0-9]
+lit ~ ["]
+lita ~ [']
+Squo ~ [']
+stago ~ '<'
+etago ~ '</'
+tagc ~ '>'
+neto ~ '/'
+netc ~ '/'
+pio ~ '<?'
+pic ~ '?>'
+dtgo ~ '['
+dtgc ~ ']'
+mdo ~ '<!'
+mdc ~ '>'
+dso ~ '['
+dsc ~ ']'
+msc ~ ']]'
+ero ~ '&'
+pero ~ '%'
+refc ~ ';'
+cro ~ '&#'
+grpo ~ '('
+grpc ~ ')'
+shortref ~ '&#TAB;'
+         | '&#RE;'
+         | '&#RS;'
+         | '&#RS;B'
+         | '&#RS;&#RE;'
+         | '&#RS;B&#RE;'
+         | 'B&#RE;'
+         | '&#SPACE;'
+         | 'BB'
+         | '"'
+         | '#'
+         | '%'
+         | Squo
+         | '('
+         | ')'
+         | '*'
+         | '+'
+         | ','
+         | '-'
+         | '--'
+         | ':'
+         | ';'
+         | '='
+         | '@'
+         | '['
+         | ']'
+         | '^'
+         | '_'
+         | '{'
+         | '|'
+         | '}'
+         | '~'
+vi ~ '='
+plus ~ '+'
+minus ~ '-'
+slashslash ~ '//'
+LCNMSTRT ~
+UCNMSTRT ~
+LCNMCHAR ~ '-'
+         | '.'
+         | LCLetter
+UCNMCHAR ~ UCLetter
+Special ~ '('
+        | ')'
+        | '+'
+        | ','
+        | '-'
+        | '.'
+        | '/'
+        | ':'
+        | '='
+        | '?'
+        | Squo
+com ~ '--'
+rni ~ '#'
+and ~ '&'
+or ~ '|'
+seq ~ ','
+opt ~ '?'
+rep ~ '*'
