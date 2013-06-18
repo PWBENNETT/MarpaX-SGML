@@ -90,14 +90,14 @@ use Carp qw( confess );
         given ($direction) {
             when (-1) {
                 $rv = $self->left_child->select($item);
-            };
+            }
             when (0) {
                 $rv = $self->content;
-            };
+            }
             when (1) {
                 $rv = $self->right_child->select($item);
-            };
-        };
+            }
+        }
         return $rv;
     }
 
@@ -112,14 +112,14 @@ use Carp qw( confess );
         given ($direction) {
             when (Nothing) {
                 $self->content = $item;
-            };
+            }
             when (-1) {
                 return $self->left_child->insert($item);
-            };
+            }
             when (1) {
                 return $self->right_child->insert($item);
-            };
-        };
+            }
+        }
         return $self;
     }
 
@@ -134,14 +134,14 @@ use Carp qw( confess );
         given ($direction) {
             when (-1) {
                 return $self->left_child->update($item);
-            };
+            }
             when (0) {
                 $self->content = $item;
-            };
+            }
             when (1) {
                 return $self->right_child->update($item);
-            };
-        };
+            }
+        }
         return $self;
     }
 
@@ -156,14 +156,14 @@ use Carp qw( confess );
         given ($direction) {
             when (-1) {
                 return $self->left_child->upsert($item);
-            };
+            }
             when (0) {
                 $self->content = $item;
-            };
+            }
             when (1) {
                 return $self->right_child->upsert($item);
-            };
-        };
+            }
+        }
         return $self;
     }
 
@@ -179,15 +179,15 @@ use Carp qw( confess );
         given ($direction) {
             when (-1) {
                 return $self->left_child->delete($item);
-            };
+            }
             when (0) {
                 $rv = $self->content;
                 $self->content = Nothing;
-            };
+            }
             when (1) {
                 return $self->right_child->delete($item);
-            };
-        };
+            }
+        }
         return $rv;
     }
 
