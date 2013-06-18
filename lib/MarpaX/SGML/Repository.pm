@@ -3,12 +3,19 @@ package MarpaX::SGML::Repository;
 use 5.014;
 use utf8;
 
+use Exporter qw( import );
+our @EXPORT_OK = qw( repo );
+
 {
 
     my $singleton = bless {
         index => 1,
         data => [ undef ],
     } => __PACKAGE__;
+
+    sub repo {
+        return $singleton;
+    }
 
     sub content {
         shift if (ref($_[0]) || $_[0]) eq __PACKAGE__;

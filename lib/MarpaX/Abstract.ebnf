@@ -168,13 +168,10 @@ GeneralEntityNameList ~ NameList
 IDValue ~ Name
 IDReferenceList ~ NameList
 IDReferenceValue ~ Name
-NameList ~ Name
-         | Name SPACE NameList
+NameList ~ Name+ separator => SPACE
 NotationName ~ Name
-NumberList ~ Number
-           | Number SPACE NumberList
-NumberTokenList ~ NumberToken
-                | NumberToken SPACE NumberTokenList
+NumberList ~ Number+ separator => SPACE
+NumberTokenList ~ NumberToken+ separator => SPACE
 ProcessingInstruction ~ ( pio ) SystemDataStar ( pic )
 SystemDataStar ~ SystemData*
 SystemData ~ CharacterData
@@ -632,7 +629,7 @@ ValidationServices ~ ( 'VALIDATE' ) ps 'GENERAL' ps Boolean
                                     ps 'FORMAL' ps Boolean
 SDIFSupport ~ ( 'SDIF' ) ps 'PACK' ps ASN1Boolean
                          ps 'UNPACK' ps ASN1Boolean
-Nothing ~
+Nothing ::=
 :lexeme Ee ~ pause => before
 RE ~ [\x{D}]
 RS ~ [\x{A}]
