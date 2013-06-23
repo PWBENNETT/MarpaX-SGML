@@ -1,0 +1,59 @@
+#!/usr/bin/env perl
+
+use 5.014;
+use utf8;
+
+use Marpa::R2;
+
+use Carp qw( carp confess );
+use Data::Dumper;
+use IO::All;
+
+sub XHTML_DECL ();
+sub XHTML_DTD ();
+sub XHTML_DOC ();
+
+my $marpa_home;
+
+BEGIN {
+    $marpa_home = io->catdir(($ENV{DEVEL_ROOT} || ($ENV{HOME}, 'MarpaX-SGML')), 'lib')->canonpath();
+}
+
+use lib "$marpa_home";
+say "$marpa_home";
+
+my $ebnf = io->catfile($marpa_home, 'MarpaX', 'Abstract.ebnf')->slurp();
+my $G = Marpa::R2::Scanless::G->new({ bless_package => 'SGML', source => \$ebnf });
+my $R = Marpa::R2::Scanless::R->new({ grammar => $G });
+
+my $html = XHTML_DTD . "\n" . XHTML_DOC;
+
+my $read = $R->read(\$html);
+my $value = $R->value();
+
+sub XHTML_DECL () {
+    return q{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">};
+}
+
+sub XHTML_DTD () {
+    return io->catfile($marpa_home, '..', 'bin', 'xhtml1-strict.dtd')->slurp();
+}
+
+sub XHTML_DOC () {
+    return XHTML_DECL . "\n" . <<'HTML';
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>An XHTML 1.0 Strict standard template</title>
+    <meta http-equiv="content-type"
+        content="text/html;charset=utf-8" />
+</head>
+
+<body>
+
+     <p>This is a test</p>
+
+</body>
+</html>
+HTML
+}
