@@ -43,7 +43,7 @@ sAtom ::= RE
         | RS
         | SPACE
         | SEPCHAR
-sStar ::= sAtom
+sStar ::= s
         | Nothing
 s ::= sAtom s
     | sAtom
@@ -54,7 +54,7 @@ ts ::= tsAtom
      | Nothing
 psAtom ::= tsAtom
          | CommentDeclaration
-psStar ::= psAtom
+psStar ::= ps
          | Nothing
 ps ::= psAtom ps
      | psAtom
@@ -217,9 +217,9 @@ DataCharacter ::= SGMLCharacterAtom
 Characters ::= Character Characters
              | Character
 Character ::= SGMLCharacter
-          | NONSGML
+            | NONSGML
 SGMLCharacter ::= SGMLCharacterAtom SGMLCharacter
-              | SGMLCharacterAtom
+                | SGMLCharacterAtom
 SGMLCharacterAtom ::= MarkupCharacter
                     | DATACHAR
 MarkupCharacter ::= NameCharacter
@@ -249,7 +249,7 @@ Number ::= Digit Number
          | Digit
 NameToken ::= NameCharacter
 NumberToken ::= Digit NameCharacter
-GeneralEntityReference ::= ero  DocumentTypeSpecification Name ReferenceEnd
+GeneralEntityReference   ::= ero  DocumentTypeSpecification Name ReferenceEnd
 ParameterEntityReference ::= pero DocumentTypeSpecification Name ReferenceEnd
 ReferenceEnd ::= refc
                | refc RE
@@ -556,15 +556,15 @@ ResultElementSpecification ::= GenericIdentifier
                              | GenericIdentifier ResultAttributeSpecification
 ResultAttributeSpecification ::= s dso AttributeSpecificationPlus dsc
 IDLinkSetDeclaration ::= mdo 'USELINK' ps LinkSetSpecification
-                                     ps LinkTypeName
-                                     ps
-                       mdc
-                     | mdo 'USELINK' ps LinkSetSpecification
-                                     ps LinkTypeName
-                       mdc
+                                       ps LinkTypeName
+                                       ps
+                         mdc
+                       | mdo 'USELINK' ps LinkSetSpecification
+                                       ps LinkTypeName
+                         mdc
 LinkSetSpecification ::= LinkSetName
-                     | rni 'EMPTY'
-                     | rni 'RESTORE'
+                       | rni 'EMPTY'
+                       | rni 'RESTORE'
 SGMLDeclaration ::= mdo 'SGML' ps MinimumLiteral
                                ps DocumentCharacterSet
                                ps CapacitySet
@@ -731,10 +731,10 @@ SDIFSupport ::= 'SDIF' ps 'PACK' ps ASN1Boolean
                        ps 'UNPACK' ps ASN1Boolean
 Nothing ~
 Ee ~ [\P{Assigned}]
-RE ~ [\x{D}]
-RS ~ [\x{A}]
-SPACE ~ [\x{20}]
-SEPCHAR ~ [\x{9}]
+RE ~ [\p{Separator}]
+RS ~ [\p{Separator}]
+SPACE ~ [\p{Separator}]
+SEPCHAR ~ [\p{Separator}]
 LCLetter ~ [a-z]
 UCLetter ~ [A-Z]
 Digit ~ [0-9]
@@ -825,6 +825,6 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
-NONSGML ~ [\P{Any}]
-DATACHAR ~ [[:graph:]]
-DELMCHAR ~ [^[:graph:]]
+NONSGML ~ [\P{Assigned}]
+DATACHAR ~ [\P{Separator}]
+DELMCHAR ~ [\p{Separator}]
