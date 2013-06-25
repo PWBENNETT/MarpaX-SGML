@@ -26,7 +26,10 @@ my $ebnf = io->catfile($marpa_home, 'MarpaX', 'Abstract.ebnf')->slurp();
 my $G = Marpa::R2::Scanless::G->new({ bless_package => 'SGML', source => \$ebnf });
 my $R = Marpa::R2::Scanless::R->new({ grammar => $G });
 
-my $html = XHTML_DTD . "\n" . XHTML_DOC;
+# my $html = XHTML_DTD . "\n" . XHTML_DOC;
+# my $html = XHTML_DOC;
+# my $html = "<test>me";
+my $html = "<test></test>";
 
 my $read = $R->read(\$html);
 my $value = $R->value();
@@ -40,7 +43,8 @@ sub XHTML_DTD () {
 }
 
 sub XHTML_DOC () {
-    return XHTML_DECL . "\n" . <<'HTML';
+    # return XHTML_DECL . "\n" . <<'HTML';
+    return <<'HTML';
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
