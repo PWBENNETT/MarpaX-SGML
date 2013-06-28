@@ -1,4 +1,4 @@
-:default ::= action => [values] bless => ::lhs
+:default ::= action => ::array bless => ::lhs
 :start ::= PotentiallySystemizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
@@ -36,9 +36,9 @@ event TAG = completed StartTag
 event TOP = completed PotentiallySystemizedDocument
 event UNCLOSED = completed UnclosedEndTag
 event UNCLOSED = completed UnclosedStartTag
-event UNMATCHED = completed UnmatchedEnd
-event UNMATCHED = completed UnmatchedStart
-lexeme default = action => [start,length,value] bless => ::name
+event UNMATCHED = predicted EndTag
+event UNMATCHED = predicted StartTag
+lexeme default = action => ::array bless => ::name
 s ~ <s single>
 <s single> ~ RE
            | RS
@@ -98,12 +98,7 @@ DocumentInstanceSet ::= BaseDocumentElement OPList
                       | BaseDocumentElement
 BaseDocumentElement ::= DocumentElement
 DocumentElement ::= Element
-Element ::= Matched
-          | UnmatchedEnd
-          | UnmatchedStart
-Matched ::= StartTag Content EndTag
-UnmatchedEnd ::= Content EndTag
-UnmatchedStart ::= StartTag Content
+Element ::= StartTag Content EndTag
 StartTag ::= stago TagType AttributeSpecifications <s opt> tagc
            | MinimizedStartTag
 MinimizedStartTag ::= EmptyStartTag
@@ -144,7 +139,7 @@ DocumentTypeSpecification ::= NameGroup
 GenericIdentifierSpecification ::= GenericIdentifier
                                  | RankStem
 GenericIdentifier ::= Name
-AttributeSpecifications ::= <s star> AttributeSpecificationPlus
+AttributeSpecifications ::= <s plus> AttributeSpecificationPlus
                           | Nil
 AttributeSpecificationPlus ::= AttributeSpecification <s star> AttributeSpecificationPlus
                              | AttributeSpecification
@@ -567,6 +562,7 @@ SGMLDeclaration ::= mdo 'SGML' ps MinimumLiteral
                                ps FeatureUse
                                ps ApplicationSpecificInformation
                     mdc
+                  | Nil
 DocumentCharacterSet ::= 'CHARSET' CharacterSetDescriptions
 CharacterSetDescriptions ::= CharacterSetDescription CharacterSetDescriptions
                            | CharacterSetDescription
@@ -715,10 +711,10 @@ ValidationServices ::= 'VALIDATE' ps 'GENERAL' ps Boolean
 SDIFSupport ::= 'SDIF' ps 'PACK' ps ASN1Boolean
                        ps 'UNPACK' ps ASN1Boolean
 Nothing ~
-RE ~ [\r]
-RS ~ [\n]
-SPACE ~ ' '
-SEPCHAR ~ [\t]
+RE ~ [\s]
+RS ~ [\s]
+SPACE ~ [\s]
+SEPCHAR ~ [\s]
 LCLetter ~ [a-z]
 UCLetter ~ [A-Z]
 DIGIT ~ [0-9]

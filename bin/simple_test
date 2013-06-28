@@ -20,7 +20,6 @@ BEGIN {
 }
 
 use lib "$marpa_home";
-say "$marpa_home";
 
 my $ebnf = io->catfile($marpa_home, 'MarpaX', 'Abstract.ebnf')->slurp();
 my $G = Marpa::R2::Scanless::G->new({ bless_package => 'SGML', source => \$ebnf });
@@ -29,10 +28,15 @@ my $R = Marpa::R2::Scanless::R->new({ grammar => $G });
 # my $html = XHTML_DTD . "\n" . XHTML_DOC;
 # my $html = XHTML_DOC;
 # my $html = "<test>me";
-my $html = "<test></test>";
+# my $html = "<test></test>";
+my $html = XHTML_DTD;
 
 my $read = $R->read(\$html);
 my $value = $R->value();
+
+print Dumper $value;
+
+exit;
 
 sub XHTML_DECL () {
     return q{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">};
@@ -61,3 +65,7 @@ sub XHTML_DOC () {
 </html>
 HTML
 }
+
+package SGML;
+
+1;
