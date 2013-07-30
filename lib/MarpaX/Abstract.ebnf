@@ -805,6 +805,6 @@ or ~ '|'
 seq ~ ','
 opt ~ '?'
 rep ~ '*'
-NONSGML ~ [\P{Assigned}]
-DATACHAR ~ [\P{Separator}]
+NONSGML ~ [^[:ascii:]]
+DATACHAR ~ [\p{MarpaX::SGML::IsDataChar}]
 DELMCHAR ~ [\p{Separator}]

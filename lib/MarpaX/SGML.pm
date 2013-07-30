@@ -183,4 +183,12 @@ sub _does_tag_apply {
     return eval($tattr);
 }
 
+sub IsDataChar {
+    return <<'DC';
++utf8::InAscii
+-utf8::3c
+-utf8::26
+DC
+}
+
 1;
