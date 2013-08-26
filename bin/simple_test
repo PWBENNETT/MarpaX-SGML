@@ -5,8 +5,6 @@ use utf8;
 
 use Marpa::R2;
 
-use MarpaX::SGML;
-
 use Carp qw( carp confess );
 use Data::Dumper;
 use IO::All;
@@ -22,6 +20,8 @@ BEGIN {
 }
 
 use lib "$marpa_home";
+
+use MarpaX::SGML;
 
 my $ebnf = io->catfile($marpa_home, 'MarpaX', 'Abstract.ebnf')->slurp();
 my $G = Marpa::R2::Scanless::G->new({ bless_package => 'SGML', source => \$ebnf });
