@@ -1,9 +1,11 @@
 #!/usr/bin/env perl
 
-use 5.014;
+use 5.018;
 use utf8;
 
 use Marpa::R2;
+
+use MarpaX::SGML;
 
 use Carp qw( carp confess );
 use Data::Dumper;
@@ -23,15 +25,15 @@ use lib "$marpa_home";
 
 my $ebnf = io->catfile($marpa_home, 'MarpaX', 'Abstract.ebnf')->slurp();
 my $G = Marpa::R2::Scanless::G->new({ bless_package => 'SGML', source => \$ebnf });
-my $R = Marpa::R2::Scanless::R->new({ grammar => $G });
+my $R = Marpa::R2::Scanless::R->new({ grammar => $G, trace_terminals => 1 });
 
 # my $html = XHTML_DTD . "\n" . XHTML_DOC;
 # my $html = XHTML_DOC;
 # my $html = "<test>me";
 # my $html = "<test></test>";
-my $html = XHTML_DTD;
+my $html = XHTML_DOC;
 
-my $read = $R->read(\$html);
+my $read = $R->read(\(XHTML_DOC));
 my $value = $R->value();
 
 print Dumper $value;
