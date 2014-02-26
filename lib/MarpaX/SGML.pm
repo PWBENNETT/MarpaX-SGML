@@ -52,26 +52,37 @@ BEGIN {
     sub master_grammar {
         return join("\n", values %$master_grammar);
     }
-    sub get_fragment {
-        shift if ref($_[0]);
-        my ($k) = @_;
-        return $master_grammar->{ $k };
+    sub clean_grammar {
+        my $self = shift;
+        $self->{ ebnf } = $master_grammar;
+        return $self;
     }
-    sub set_fragment {
-        shift if ref($_[0]);
-        return unless @_ == 2;
-        my ($k, $v) = @_;
-        $master_grammar->{ $k } = $v;
-        return;
-    }
-    sub mutate_fragment {
-        shift if ref($_[0]);
-        my ($k, $coderef) = @_;
-        my $iv = $coderef->($k => $master_grammar->{ $k });
-        return unless defined $iv;
-        $master_grammar->{ $k } = $iv;
-        return;
-    }
+}
+
+sub get_fragment {
+    my $self = shift;
+    my ($k) = @_;
+    return $self->{ ebnf }->{ $k };
+}
+
+sub set_fragment {
+    my $self = shift;
+    return unless @_ == 2;
+    my ($k, $v) = @_;
+    $self->{ ebnf }->{ $k } = $v;
+    return $self;
+}
+
+sub mutate_fragment {
+    my $self = shift;
+    my ($k, $code) = @_;
+    my $iv
+        = ref($code)
+        ? $code->($self, $k => $self->{ ebnf }->{ $k })
+        : $self->$code($k => $self->{ ebnf }->{ $k })
+        ;
+    $self->{ ebnf }->{ $k } = $iv if defined $iv;
+    return $self;
 }
 
 sub true () { return 1; }
@@ -96,7 +107,9 @@ sub xmlPI () { return (':TOP' => \&_ensure_xml_pi); }
 sub new {
     my $class = shift;
     $class = ref($class) || $class;
-    return bless { }, $class;
+    my $self = bless { }, $class;
+    $self->clean_grammar();
+    return $self;
 }
 
 sub add_system {
