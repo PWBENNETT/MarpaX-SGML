@@ -29,11 +29,11 @@ my $R = Marpa::R2::Scanless::R->new({ grammar => $G, trace_terminals => 1 });
 
 # my $html = XHTML_DTD . "\n" . XHTML_DOC;
 # my $html = XHTML_DOC;
-# my $html = "<test>me";
+my $html = "<test>me";
 # my $html = "<test></test>";
-my $html = XHTML_DOC;
+# my $html = XHTML_DOC;
 
-my $read = $R->read(\(XHTML_DOC));
+my $read = $R->read(\$html);
 my $value = $R->value();
 
 print Dumper $value;
@@ -69,5 +69,8 @@ HTML
 }
 
 package SGML;
+
+our $SELF;
+sub new { return $SELF; }
 
 1;

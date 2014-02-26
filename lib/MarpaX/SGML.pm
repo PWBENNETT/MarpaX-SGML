@@ -1,6 +1,6 @@
 package MarpaX::SGML;
 
-use 5.014;
+use 5.018;
 use utf8;
 
 use Carp qw( cluck croak );
@@ -185,9 +185,12 @@ sub _does_tag_apply {
 
 sub IsDataChar {
     return <<'DC';
-+utf8::InAscii
--utf8::3c
--utf8::26
++utf8::IsAscii
+-0A
+-0E
+-20
+-26
+-3C
 DC
 }
 
