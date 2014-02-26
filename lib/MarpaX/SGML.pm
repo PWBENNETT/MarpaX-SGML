@@ -14,6 +14,57 @@ our %EXPORT_TAGS = (
     ':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )],
 );
 
+BEGIN {
+    push @INC, sub {
+        my ($self, $filename) = @_;
+        my $ebnf = $filename;
+        $ebnf =~ s/\.pm$/.ebnf/io;
+        $ebnf =~ s{.+/}{}g;
+        my $location = io()->catfile($ebnf)->absolute->canonpath;
+        $location =~ s{lib}{ebnf};
+        my @ebnf = io($location)->chomp->slurp;
+        my $package = $filename;
+        $package =~ s{[/\\]}{::}iog;
+        $package =~ s/\.pm$//io;
+        my @lines = (
+            "package $package;",
+            "sub ebnf {",
+            "    return <<'MARPA';",
+            @ebnf,
+            "MARPA",
+            "}",
+            "1;",
+        );
+        return sub {
+            return 0 unless @lines;
+            $_ = shift @lines;
+            return 1;
+        };
+    };
+}
+
+{
+    my $master_grammar = { };
+    sub init_master {
+        for my $i (qw( Abstract Axiomatic DTD DefaultG0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
+            eval "require MarpaX::SGML::${i}" or die $@;
+            $master_grammar->{ $i } = eval "MarpaX::SGML::${i}::ebnf()" or die $@;
+        }
+    }
+    sub master_grammar {
+        return join("\n", values %$master_grammar);
+    }
+    sub get_fragment {
+        my ($k) = @_;
+        return $master_grammar->{ $k };
+    }
+    sub set_fragment {
+        my ($k, $v) = @_;
+        $master_grammar->{ $k } = $v;
+        return;
+    }
+}
+
 sub true () { return 1; }
 sub false () { return; }
 
