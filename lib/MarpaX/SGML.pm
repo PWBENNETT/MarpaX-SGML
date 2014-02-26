@@ -3,16 +3,8 @@ package MarpaX::SGML;
 use 5.018;
 use utf8;
 
-use Carp qw( cluck croak );
-use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
-use Tree::DAG_Node;
-
-our @EXPORT_OK = qw( parse sgml libxml shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI );
-our %EXPORT_TAGS = (
-    ':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )],
-);
 
 BEGIN {
     push @INC, sub {
@@ -149,5 +141,14 @@ sub IsDataChar {
 -3C
 DC
 }
+
+1;
+
+package MarpaX::SGML::Semantics;
+
+use 5.018;
+use utf8;
+
+use Tree::DAG_Node;
 
 1;
