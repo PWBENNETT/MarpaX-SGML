@@ -47,8 +47,8 @@ BEGIN {
     my $master_grammar = { };
     sub init_master {
         for my $i (qw( Abstract Axiomatic DTD DefaultG0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
-            eval "require MarpaX::SGML::${i}" or die $@;
-            $master_grammar->{ $i } = eval "MarpaX::SGML::${i}::ebnf()" or die $@;
+            eval('require MarpaX::SGML::' . $i) or die $@;
+            $master_grammar->{ $i } = eval('MarpaX::SGML::' . $i . '::ebnf()') or die $@;
         }
     }
     sub master_grammar {
@@ -58,9 +58,11 @@ BEGIN {
         my ($k) = @_;
         return $master_grammar->{ $k };
     }
-    sub set_fragment {
-        my ($k, $v) = @_;
-        $master_grammar->{ $k } = $v;
+    sub mutate_fragment {
+        my ($k, $coderef) = @_;
+        my $iv = $coderef->($master_grammar->{ $k });
+        return unless defined $iv;
+        $master_grammar->{ $k } = $iv;
         return;
     }
 }
