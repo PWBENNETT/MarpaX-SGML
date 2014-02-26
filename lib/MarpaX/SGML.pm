@@ -7,6 +7,7 @@ use Carp qw( cluck croak );
 use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
+use Tree::DAG_Node;
 
 our @EXPORT_OK = qw( parse sgml libxml shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI );
 our %EXPORT_TAGS = (
@@ -52,16 +53,19 @@ BEGIN {
         return join("\n", values %$master_grammar);
     }
     sub get_fragment {
+        shift if ref($_[0]);
         my ($k) = @_;
         return $master_grammar->{ $k };
     }
     sub set_fragment {
+        shift if ref($_[0]);
         return unless @_ == 2;
         my ($k, $v) = @_;
         $master_grammar->{ $k } = $v;
         return;
     }
     sub mutate_fragment {
+        shift if ref($_[0]);
         my ($k, $coderef) = @_;
         my $iv = $coderef->($k => $master_grammar->{ $k });
         return unless defined $iv;
