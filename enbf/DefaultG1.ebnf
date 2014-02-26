@@ -1,0 +1,7 @@
+Boolean ::= 'YES'
+          | 'NO'
+CountedBoolean ::= 'YES' ps Number
+                 | 'NO'
+ASN1Boolean ::= 'YES' ps 'ASN1'
+              | 'YES'
+              | 'NO'
