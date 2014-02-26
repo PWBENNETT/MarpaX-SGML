@@ -8,7 +8,6 @@ use Exporter qw( import );
 use IO::All;
 use Marpa::R2;
 
-our @EXPORT = qw( sgml );
 our @EXPORT_OK = qw( parse sgml libxml shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI );
 our %EXPORT_TAGS = (
     ':xml' => [qw( shortenUnmatchedStartTags shortenUnmatchedEndTags lengthenUnmatchedStartTags lengthenUnmatchedEndTags fullyTagged integrallyStored xmlPI )],
@@ -45,11 +44,9 @@ BEGIN {
 
 {
     my $master_grammar = { };
-    sub init_master {
-        for my $i (qw( Abstract Axiomatic DTD DefaultG0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
-            eval('require MarpaX::SGML::' . $i) or die $@;
-            $master_grammar->{ $i } = eval('MarpaX::SGML::' . $i . '::ebnf()') or die $@;
-        }
+    for my $i (qw( Abstract Axiomatic DTD DefaultG0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
+        eval('require MarpaX::SGML::' . $i) or die $@;
+        $master_grammar->{ $i } = eval('MarpaX::SGML::' . $i . '::ebnf()') or die $@;
     }
     sub master_grammar {
         return join("\n", values %$master_grammar);
@@ -58,9 +55,15 @@ BEGIN {
         my ($k) = @_;
         return $master_grammar->{ $k };
     }
+    sub set_fragment {
+        return unless @_ == 2;
+        my ($k, $v) = @_;
+        $master_grammar->{ $k } = $v;
+        return;
+    }
     sub mutate_fragment {
         my ($k, $coderef) = @_;
-        my $iv = $coderef->($master_grammar->{ $k });
+        my $iv = $coderef->($k => $master_grammar->{ $k });
         return unless defined $iv;
         $master_grammar->{ $k } = $iv;
         return;
