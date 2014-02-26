@@ -93,7 +93,7 @@ sub new {
 
 sub sgml {
     my $self = eval { $_[0]->isa(__PACKAGE__) } ? shift(@_) : __PACKAGE__->new();
-    my $document = \do{ shift(@_) };
+    my $document = shift(@_);
     my %args = ref($_[0]) ? %{$_[0]} : @_;
     my $G = Marpa::R2::SLIF::G->new({ %{$self->{ G_args }}, source => \do{ $self->{ ebnf }} });
     my $R = Marpa::R2::SLIF::R->new({ %{$self->{ R_args }}, grammar => $G });
@@ -103,7 +103,7 @@ sub sgml {
     $AST->walk_down({ callback => sub { $_[1]->{ scoreboard } ||= $scoreboard; _stringify_node(@_) }, });
     my $rv = $scoreboard->{ output };
     $AST->delete_tree();
-    return $rv;
+    return \$rv;
 }
 
 sub _stringify_node {
