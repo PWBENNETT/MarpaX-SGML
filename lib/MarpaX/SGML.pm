@@ -78,25 +78,6 @@ sub mutate_fragment {
     return $self;
 }
 
-sub true () { return 1; }
-sub false () { return; }
-
-sub shortenUnmatchedStartTags () { return (':TAG[@type="start" and @matched=false]' => \&_as_short_as_possible); }
-sub shortenUnmatchedEndTags () { return (':TAG[@type="end" and @matched=false]' => \&_as_short_as_possible); }
-
-sub lengthenUnmatchedStartTags () { return (':TAG[@type="start" and @matched=false]' => \&_as_long_as_possible); }
-sub lengthenUnmatchedEndTags () { return (':TAG[@type="end" and @matched=false]' => \&_as_long_as_possible); }
-
-sub fullyTagged () { return (':DTD' => \&_ensure_fully_tagged); }
-sub integrallyStored () { return (':ELEMENT' => \&_ensure_integrally_stored); }
-
-sub xmlPI () { return (':TOP' => \&_ensure_xml_pi); }
-
-{
-    my $Nothing = [];
-    sub Nothing () { return $Nothing; }
-}
-
 sub new {
     my $class = shift;
     $class = ref($class) || $class;
