@@ -17,7 +17,6 @@ BEGIN {
         $ebnf =~ s/\.pm$/.ebnf/io;
         $ebnf =~ s{.+/}{}g; # FIXME not platform-independent
         my $location = io()->catfile($ebnf)->absolute->canonpath;
-        $location =~ s{/lib/}{/ebnf/}; # FIXME not platform-independent
         my @contents = io($location)->chomp->slurp;
         my @lines = (
             "package $package;",
