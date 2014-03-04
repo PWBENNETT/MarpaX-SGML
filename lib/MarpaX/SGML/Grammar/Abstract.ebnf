@@ -1,4 +1,4 @@
-:default ::= action => ::array bless => ::lhs
+:default ::= action => ::array
 :start ::= PotentiallySystemizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
@@ -38,7 +38,7 @@ event UNCLOSED = completed UnclosedEndTag
 event UNCLOSED = completed UnclosedStartTag
 event UNMATCHED = predicted EndTag
 event UNMATCHED = predicted StartTag
-lexeme default = action => ::array bless => ::name
+lexeme default = action => ::array forgiving => 1
 s ~ <s single>
 <s single> ~ RE
            | RS
