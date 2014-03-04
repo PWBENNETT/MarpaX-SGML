@@ -107,8 +107,5 @@ DVMagicMarker ::= 'REQUIRED'
                 | 'IMPLIED'
 NotationDeclaration ::= mdo 'NOTATION' ps NotationName
                                        ps NotationIdentifier
-                                       ps
-                        mdc
-                      | mdo 'NOTATION' ps NotationName
-                                       ps NotationIdentifier
+                                       <ps opt>
                         mdc

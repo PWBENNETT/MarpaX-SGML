@@ -49,15 +49,18 @@ s ~ <s single>
 <s star> ~ <s single>*
 <s plus> ~ <s single>+
 ts ::= s
-     | Nil
      | ParameterEntityReference
+<ts opt> ::= ts
+           | Nil
 ps ::= ts
-     | Nil
      | CommentDeclaration
+<ps opt> ::= ps
+           | Nil
 ds ::= ps
-     | Nil
      | ProcessingInstruction
      | MarkedSectionDeclaration
+<ds opt> ::= ds
+           | Nil
 Nil ~ Nothing
 PotentiallySystemizedDocument ::= OpeningSystemDeclarations SGMLDocument
 OpeningSystemDeclarations ::= <s star> SystemDeclarationList
@@ -350,10 +353,7 @@ ResultElementSpecification ::= GenericIdentifier
 ResultAttributeSpecification ::= s dso AttributeSpecificationPlus dsc
 IDLinkSetDeclaration ::= mdo 'USELINK' ps LinkSetSpecification
                                        ps LinkTypeName
-                                       ps
-                         mdc
-                       | mdo 'USELINK' ps LinkSetSpecification
-                                       ps LinkTypeName
+                                       <ps opt>
                          mdc
 LinkSetSpecification ::= LinkSetName
                        | rni 'EMPTY'

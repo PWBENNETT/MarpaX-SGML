@@ -5,15 +5,7 @@ SGMLDeclaration ::= mdo 'SGML' ps MinimumLiteral
                                ps ConcreteSyntax
                                ps FeatureUse
                                ps ApplicationSpecificInformation
-                               ps
-                    mdc
-                  | mdo 'SGML' ps MinimumLiteral
-                               ps DocumentCharacterSet
-                               ps CapacitySet
-                               ps ConcreteSyntaxScope
-                               ps ConcreteSyntax
-                               ps FeatureUse
-                               ps ApplicationSpecificInformation
+                               <ps opt>
                     mdc
                   | Nil
 DocumentCharacterSet ::= 'CHARSET' CharacterSetDescriptions

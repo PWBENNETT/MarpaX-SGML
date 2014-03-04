@@ -15,7 +15,6 @@ BEGIN {
         return unless $package =~ /^MarpaX::SGML::Grammar::/;
         my $ebnf = $filename;
         $ebnf =~ s/\.pm$/.ebnf/io;
-        $ebnf =~ s{.+/}{}g; # FIXME not platform-independent
         my $location = io()->catfile($ebnf)->absolute->canonpath;
         my @contents = io($location)->chomp->slurp;
         my @lines = (

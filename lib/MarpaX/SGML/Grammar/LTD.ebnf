@@ -25,10 +25,7 @@ LinkAttributeSet ::= AttributeDefinitionListDeclaration
                    | EntitySet
 LinkSetDeclaration ::= mdo 'LINK' ps LinkSetName
                                   ps LinkRule
-                                  ps
-                       mdc
-                     | mdo 'LINK' ps LinkSetName
-                                  ps LinkRule
+                                  <ps opt>
                        mdc
 LinkSetUseDeclaration ::= DATACHAR LinkSetUseDeclaration
                         | DATACHAR

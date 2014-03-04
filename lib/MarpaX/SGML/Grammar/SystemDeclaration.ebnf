@@ -6,16 +6,7 @@ SystemDeclaration ::= mdo 'SYSTEM' ps MinimumLiteral
                                    ps ConcreteSyntaxesSupportedPlus
                                    ps ValidationServices
                                    ps SDIFSupport
-                                   ps
-                      mdc
-                    | mdo 'SYSTEM' ps MinimumLiteral
-                                   ps DocumentCharacterSet
-                                   ps CapacitySet
-                                   ps FeatureUse
-                                   ps ConcreteSyntaxScope
-                                   ps ConcreteSyntaxesSupportedPlus
-                                   ps ValidationServices
-                                   ps SDIFSupport
+                                   <ps opt>
                       mdc
 ConcreteSyntaxesSupportedPlus ::= ConcreteSyntaxesSupported ConcreteSyntaxesSupportedPlus
                                 | ConcreteSyntaxesSupported
