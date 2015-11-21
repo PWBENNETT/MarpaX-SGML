@@ -36,7 +36,7 @@ BEGIN {
 
 {
     my $master_grammar = { };
-    for my $i (qw( Abstract Axiomatic DTD DefaultG0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
+    for my $i (qw( Abstract Axiomatic DTD DefaultL0 DefaultG1 LTD Prolog SGMLDeclaration SystemDeclaration )) {
         eval('require MarpaX::SGML::Grammar::' . $i) or die $@;
         $master_grammar->{ $i } = eval('MarpaX::SGML::Grammar::' . $i . '::ebnf()') or die $@;
     }

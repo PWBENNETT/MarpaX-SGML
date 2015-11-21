@@ -1,4 +1,4 @@
-:default ::= action => ::array action => add_to_tree
+:default ::= action => add_to_tree
 :start ::= PotentiallySystemizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
