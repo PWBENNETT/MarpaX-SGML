@@ -1,4 +1,4 @@
-:default ::= action => ::array
+:default ::= action => ::array action => add_to_tree
 :start ::= PotentiallySystemizedDocument
 event ATTR = completed AttributeSpecification
 event ATTRVAL = completed AttributeValueSpecification
@@ -38,7 +38,7 @@ event UNCLOSED = completed UnclosedEndTag
 event UNCLOSED = completed UnclosedStartTag
 event UNMATCHED = predicted EndTag
 event UNMATCHED = predicted StartTag
-lexeme default = action => ::array forgiving => 1
+lexeme default = action => ::array forgiving => 1 latm => 1
 s ~ <s single>
 <s single> ~ RE
            | RS
@@ -243,12 +243,12 @@ MinimumLiteral ::= lit  MinimumData lit
 MinimumData ::= MinimumDataCharacter MinimumData
               | MinimumDataCharacter
 MinimumDataCharacter ~ RS
-                       | RE
-                       | SPACE
-                       | LCLetter
-                       | UCLetter
-                       | DIGIT
-                       | Special
+                     | RE
+                     | SPACE
+                     | LCLetter
+                     | UCLetter
+                     | DIGIT
+                     | Special
 FormalPublicIdentifier ::= OwnerIdentifier slashslash TextIdentifier
 OwnerIdentifier ::= ISOOwnerIdentifier
                   | RegisteredOwnerIdentifier
