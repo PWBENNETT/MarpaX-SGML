@@ -18,6 +18,24 @@
         <array>
             <dict>
                 <key>begin</key>
+                <string>^\s*(#.+)</string>
+                <key>end</key>
+                <string>$</string>
+                <key>name</key>
+                <string>punctuation.section.scope.marpa</string>
+                <key>beginCaptures</key>
+                <dict>
+                    <key>1</key>
+                    <dict>
+                        <key>name</key>
+                        <string>comment.language.marpa</string>
+                    </dict>
+                </dict>
+                <key>contentName</key>
+                <string>source.marpa</string>
+            </dict>
+            <dict>
+                <key>begin</key>
                 <string>(lexeme\s+default)\s+(=)\s+</string>
                 <key>end</key>
                 <string>^(?!\s)</string>
