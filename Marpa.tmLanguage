@@ -18,7 +18,7 @@
         <array>
             <dict>
                 <key>begin</key>
-                <string>^\s*(#.+)</string>
+                <string>\s*(#.+)</string>
                 <key>end</key>
                 <string>$</string>
                 <key>name</key>
@@ -46,7 +46,7 @@
                     <key>1</key>
                     <dict>
                         <key>name</key>
-                        <string>constant.language.marpa</string>
+                        <string>punctuation.definition.variable.marpa</string>
                     </dict>
                     <key>2</key>
                     <dict>
@@ -94,7 +94,7 @@
             </dict>
             <dict>
                 <key>begin</key>
-                <string>(\S+)\s+(\S+)\s+(=)\s+(\S+)\s+\S+</string>
+                <string>(\S+)\s+(\S+)\s+(=)\s+(\S+)\s+(\S+)</string>
                 <key>end</key>
                 <string>^(?!\s)</string>
                 <key>name</key>
@@ -104,12 +104,12 @@
                     <key>1</key>
                     <dict>
                         <key>name</key>
-                        <string>constant.language.marpa</string>
+                        <string>entity.name.function.marpa</string>
                     </dict>
                     <key>2</key>
                     <dict>
                         <key>name</key>
-                        <string>string.quoted.single.marpa</string>
+                        <string>constant.other.key.marpa</string>
                     </dict>
                     <key>3</key>
                     <dict>
@@ -120,6 +120,11 @@
                     <dict>
                         <key>name</key>
                         <string>constant.language.marpa</string>
+                    </dict>
+                    <key>5</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.quoted.single.marpa</string>
                     </dict>
                 </dict>
                 <key>endCaptures</key>
@@ -402,7 +407,7 @@
             </dict>
             <dict>
                 <key>begin</key>
-                <string>^(:\S+)\s+(::=)</string>
+                <string>^(:)(\S+)\s+(::=)</string>
                 <key>end</key>
                 <string>^(?!\s)</string>
                 <key>name</key>
@@ -415,6 +420,11 @@
                         <string>constant.language.marpa</string>
                     </dict>
                     <key>2</key>
+                    <dict>
+                        <key>name</key>
+                        <string>entity.name.function.marpa</string>
+                    </dict>
+                    <key>3</key>
                     <dict>
                         <key>name</key>
                         <string>punctuation.definition.variable.marpa</string>
@@ -448,7 +458,7 @@
             </dict>
             <dict>
                 <key>begin</key>
-                <string>^(:\S+)\s+(~)</string>
+                <string>^(:)(\S+)\s+(~)</string>
                 <key>end</key>
                 <string>^(?!\s)</string>
                 <key>name</key>
@@ -461,6 +471,11 @@
                         <string>constant.language.marpa</string>
                     </dict>
                     <key>2</key>
+                    <dict>
+                        <key>name</key>
+                        <string>punctuation.definition.variable.marpa</string>
+                    </dict>
+                    <key>3</key>
                     <dict>
                         <key>name</key>
                         <string>punctuation.definition.variable.marpa</string>
@@ -671,7 +686,7 @@
                 <key>begin</key>
                 <string>\s(['])</string>
                 <key>end</key>
-                <string>[']</string>
+                <string>['](:i)?</string>
                 <key>beginCaptures</key>
                 <dict>
                     <key>1</key>
@@ -685,7 +700,12 @@
                     <key>0</key>
                     <dict>
                         <key>name</key>
-                        <string>punctuation.definition.string.begin.marpa</string>
+                        <string>punctuation.definition.string.end.marpa</string>
+                    </dict>
+                    <key>1</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.regexp.compile.marpa</string>
                     </dict>
                 </dict>
                 <key>contentName</key>
@@ -869,7 +889,7 @@
             <key>adverb</key>
             <dict>
                 <key>begin</key>
-                <string>(\S+)\s+(=&gt;)</string>
+                <string>(\S+)\s+(=&gt;)\s+</string>
                 <key>beginCaptures</key>
                 <dict>
                     <key>1</key>
@@ -882,6 +902,16 @@
                         <key>name</key>
                         <string>punctuation.definition.variable.marpa</string>
                     </dict>
+                    <key>3</key>
+                    <dict>
+                        <key>name</key>
+                        <string>constant.language.marpa</string>
+                    </dict>
+                    <key>4</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.quoted.single.marpa</string>
+                    </dict>
                 </dict>
                 <key>end</key>
                 <string>(?!.)</string>
@@ -890,19 +920,74 @@
                 <key>patterns</key>
                 <array>
                     <dict>
-                        <key>match</key>
-                        <string>(::\S+)</string>
+                        <key>include</key>
+                        <string>#quoted_literal</string>
+                    </dict>
+                    <dict>
+                        <key>include</key>
+                        <string>#adverb</string>
+                    </dict>
+                    <dict>
+                        <key>include</key>
+                        <string>#adverb_word</string>
+                    </dict>
+                    <dict>
+                        <key>include</key>
+                        <string>#adverb_array</string>
+                    </dict>
+                </array>
+            </dict>
+            <key>adverb_word</key>
+            <dict>
+                <key>begin</key>
+                <string>(::)?([^\[]\S*)</string>
+                <key>beginCaptures</key>
+                <dict>
+                    <key>1</key>
+                    <dict>
                         <key>name</key>
                         <string>constant.language.marpa</string>
-                        <key>captures</key>
-                        <dict>
-                            <key>1</key>
-                            <dict>
-                                <key>name</key>
-                                <string>constant.language.marpa</string>
-                            </dict>
-                        </dict>
                     </dict>
+                    <key>2</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.quoted.single.marpa</string>
+                    </dict>
+                </dict>
+                <key>end</key>
+                <string>(?!.)</string>
+                <key>name</key>
+                <string>source.marpa</string>
+                <key>patterns</key>
+                <array>
+                    <dict>
+                        <key>include</key>
+                        <string>#quoted_literal</string>
+                    </dict>
+                    <dict>
+                        <key>include</key>
+                        <string>#adverb</string>
+                    </dict>
+                </array>
+            </dict>
+            <key>adverb_array</key>
+            <dict>
+                <key>begin</key>
+                <string>(\[.+?\])</string>
+                <key>beginCaptures</key>
+                <dict>
+                    <key>1</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.quoted.single.marpa</string>
+                    </dict>
+                </dict>
+                <key>end</key>
+                <string>(?!.)</string>
+                <key>name</key>
+                <string>source.marpa</string>
+                <key>patterns</key>
+                <array>
                     <dict>
                         <key>include</key>
                         <string>#quoted_literal</string>
